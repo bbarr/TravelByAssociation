@@ -1,0 +1,21 @@
+!!!
+%html
+  %head
+    %link{ :rel => "stylesheet", :href => "/css/base.css" }
+  %body
+    #container
+      %header
+        = haml :"partials/header", :layout => false
+      
+      #content
+        = haml :"partials/flash", :layout => false
+        
+        = yield
+
+      %footer
+        = haml :"partials/footer", :layout => false
+		
+    -#%script{ :type => "text/javascript", :src => "/js/jquery.js" }
+    -#%script{ :type => "text/javascript", :src => "/js/underscore.js" }
+    -#%script{ :type => "text/javascript", :src => "/js/tba.js" }
+    = content :js
