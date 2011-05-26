@@ -8,6 +8,4 @@ class Account < Mote::Document
     Account.find_one 'email' => email, 'password' => password
   end
   
-  
-  
 end

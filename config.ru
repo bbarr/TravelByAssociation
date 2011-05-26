@@ -14,14 +14,6 @@ map "/" do
 	run TBA::Default
 end
 
-map "/dashboard" do
-  run TBA::Dashboard
-end
-
-map "/account" do
-	run TBA::Account
-end
-
 map "/trips" do
 	run TBA::Trips
 end
