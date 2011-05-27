@@ -1,5 +1,10 @@
 class TBA::Trips < TBA::Base
 
+  get '/' do
+    @trips = Trip.find
+    haml :trips
+  end
+  
   post '/' do
     must_be_logged_in
 
@@ -15,10 +20,18 @@ class TBA::Trips < TBA::Base
     
   end
 
-  get '/:id' do
+  get '/:trip_id' do
     must_be_logged_in
-    @trip = Trip.find_by_id params[:id]
-    haml :''
+    
+    @trip = Trip.find_by_id params[:trip_id]
+    haml :trip
+  end
+  
+  get '/:trip_id/edit' do
+    must_be_logged_in
+    
+    @trip = Trip.find_by_id params[:trip_id]
+    haml :create
   end
 
 end

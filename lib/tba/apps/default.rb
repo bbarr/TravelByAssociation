@@ -1,7 +1,7 @@
 class TBA::Default < TBA::Base
 
   get "/" do
-    haml :"default/index"
+    haml :index
   end
   
 end

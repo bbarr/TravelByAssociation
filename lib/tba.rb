@@ -5,12 +5,12 @@ Bundler.require
 # namespace
 module TBA; end
 
-require File.join(File.dirname(__FILE__), "./strategies.rb")
-require File.join(File.dirname(__FILE__), "./mote_extensions.rb")
-Dir.glob(File.join(File.dirname(__FILE__), "./helpers/*.rb")) { |file| require file }
-require File.join(File.dirname(__FILE__), "./apps/base.rb")
-Dir.glob(File.join(File.dirname(__FILE__), "./apps/*.rb")) { |file| require file }
-Dir.glob(File.join(File.dirname(__FILE__), "./models/*.rb")) { |file| require file }
+require File.join(File.dirname(__FILE__), "./tba/strategies.rb")
+require File.join(File.dirname(__FILE__), "./tba/mote_extensions.rb")
+Dir.glob(File.join(File.dirname(__FILE__), "./tba/helpers/*.rb")) { |file| require file }
+require File.join(File.dirname(__FILE__), "./tba/apps/base.rb")
+Dir.glob(File.join(File.dirname(__FILE__), "./tba/apps/*.rb")) { |file| require file }
+Dir.glob(File.join(File.dirname(__FILE__), "./tba/models/*.rb")) { |file| require file }
 
 # setup mote with mongoDB connection
 if ENV['MONGOHQ_URL']
