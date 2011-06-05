@@ -1,0 +1,3 @@
+[submodule "public/js/lib/mote"]
+	path = public/js/lib/mote
+	url = git@github.com:bbarr/MoteJS.git

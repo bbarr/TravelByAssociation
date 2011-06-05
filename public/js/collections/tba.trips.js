@@ -1,6 +1,6 @@
-tba.Trips = Mote.Collection(function() {
+tba.Trips = new Mote.Collection(function() {
 	
-	this.include(Mote.EmbeddedDocuments);
+	this.use(Mote.EmbeddedDocuments);
 	
 	this.name = 'trips';
 	this.keys = [
