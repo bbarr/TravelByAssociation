@@ -6,7 +6,7 @@ class TBA::Trips < TBA::Base
   end
   
   post '/' do
-    must_be_logged_in
+    must_be_someone
 
     trip = Trip.new params[:trip]
 
@@ -21,17 +21,19 @@ class TBA::Trips < TBA::Base
   end
 
   get '/:trip_id' do
-    must_be_logged_in
+    must_be_someone
     
     @trip = Trip.find_by_id params[:trip_id]
     haml :trip
   end
   
-  get '/:trip_id/edit' do
-    must_be_logged_in
+  delete '/:trip_id' do
+    must_be_admin
     
-    @trip = Trip.find_by_id params[:trip_id]
-    haml :create
+    trip = Trip.find_by_id params[:trip]
+    trip.remove unless trip.nil?
+    
+    haml :index
   end
 
 end
