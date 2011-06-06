@@ -1,3 +1,6 @@
 [submodule "public/js/lib/mote"]
 	path = public/js/lib/mote
 	url = git@github.com:bbarr/MoteJS.git
+[submodule "public/js/lib/fugue"]
+	path = public/js/lib/fugue
+	url = git@github.com:bbarr/Fugue.git

@@ -6,10 +6,11 @@
 		scripts = [
 			'tba.app.js',
 			'lib/mote/src/mote.js',
-			'collections/tba.trips.js',
+			'lib/fugue/fugue.js',
 			'collections/tba.transits.js',
 			'collections/tba.locations.js',
-			'collections/tba.associates.js'
+			'collections/tba.associates.js',
+			'collections/tba.trips.js'
 		],
 		dequeue = function() {
 			var uri = scripts[index];
