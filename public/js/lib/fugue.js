@@ -9,15 +9,15 @@
  */
 
 (function() {
-    
+
 	var Fugue, _Widget;
-    
+
 	_Widget = function(name, query, parent) {
 
 		this.name = name;
 		this.query = query || '#' + name;
 		this.parent = parent;
-		
+
 		this.$container = $(this.query).first();
 		this.subscriptions = { '*': [] };
 		this.elements = {};
@@ -69,6 +69,14 @@
 			}
 		},
 		
+		extend: function(obj) {
+			for (var key in obj) this[key] = obj[key];
+		},
+		
+		execute: function(fn) {
+			fn.call(this);
+		},
+		
 		find: function(query) {
 			return this.elements[query] || (this.elements[query] = this.$container.find(query));
 		},
@@ -85,11 +93,8 @@
 		},
 		
 		create: function(name, query) {
-			
-			Widget.prototype = this;
-			var extended = new Widget(name, query, this);
-			
-			return this.widgets[name] = extended;
+			_Widget.prototype = this;
+			return this.widgets[name] = new _Widget(name, query, this);
 		},
 		
 		publish: function(event, data) {
@@ -121,7 +126,7 @@
 			    name = event.name, 
 			    formatted_fn, 
 			    fns;
-			    
+			
 			formatted_fn = function(data) { fn.call(self, data); }
 			formatted_fn.original_fn = fn;
 			fns = target.subscriptions[name] || (target.subscriptions[name] = []);
@@ -156,10 +161,10 @@
 			
 			_parse_event_string: function(event_string) {
 			
-				var data = {}, segments, target = fugue;
+				var data = {}, segments, target = Fugue;
 			
 				segments = event_string.split('.');
-			
+				
 				while (segments[1]) {
 					target = target.widgets[segments.shift()];
 				}
@@ -170,9 +175,8 @@
 				return data;
 			}
 			
-		// END PRIVATE	
+		// END PRIVATE
 	}
-	
-	window.Fugue = Fugue = new _Widget('fugue', document.body, false)
 
+	window.Fugue = Fugue = new _Widget('fugue', document.body, false);
 })();

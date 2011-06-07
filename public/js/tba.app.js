@@ -1,24 +1,28 @@
-var tba = {};
+tba.app = Fugue.create('app', document.body);
 
-tba.app = (function() {
+tba.app.extend({
 	
-	var _events = {};
+	load: function(hash) {
+		this.current_trip.load(hash);
+	},
 	
-	return {
+	refresh: function() {
 		
-		publish: function(event, data) {
-			
-			var fns = _events[event] || [],
-				len = fns.length,
-				i = 0;
-			
-			for (; i < len; i++) fns[i](data);
-		},
-		
-		subscribe: function(event, fn) {
-			_events[event] || (_events[event] = []);
-			_events[event].push(fn);
+		var location = window.location,
+			hash = location.hash;
+
+		if (hash) {
+			hash = hash.substr(1);
+			this.load(hash);
 		}
+		
 	}
+});
+
+tba.app.subscribe('app.ready', function() {
 	
-})();
+	this.current_trip = new tba.Trips.Document;
+
+	this.refresh();
+	
+});

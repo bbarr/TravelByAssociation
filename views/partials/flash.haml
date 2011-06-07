@@ -1,2 +1,7 @@
-= flash[:notice]
-= flash[:error]
+%ul{ :id => 'flash'}
+  %li{ :class => 'notice hide' }
+    %span click to close
+    %div
+  %li{ :class => 'error hide' }
+    %span click to close
+    %div
