@@ -5,6 +5,7 @@ gem "sinatra"
 gem "json"
 gem "haml"
 gem "rack-flash"
+gem "rack-proxy"
 gem "warden"
 gem "shotgun", :group => :development
 gem "rspec", :group => :development

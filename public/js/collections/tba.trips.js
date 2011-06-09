@@ -1,6 +1,6 @@
 tba.Trips = new Mote.Collection(function() {
 	
-	this.use(Mote.EmbeddedDocuments)
+	this.use(Mote.EmbeddedDocuments);
 	this.use(Mote.Rest);
 		
 	this.name = 'trips';

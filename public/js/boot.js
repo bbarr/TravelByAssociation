@@ -8,15 +8,9 @@ var tba = {};
 		scripts = [
 			'lib/mote.js',
 			'lib/fugue.js',
-			'tba.app.js',
 			'mote.rest.js',
-			'widgets/tba.map.js',
-			'widgets/tba.itinerary.js',
-			'widgets/tba.flash.js',
-			'collections/tba.transits.js',
-			'collections/tba.locations.js',
-			'collections/tba.associates.js',
-			'collections/tba.trips.js'
+			'tba.app.js',
+			'tba.collections.js'
 		],
 		dequeue = function() {
 			
