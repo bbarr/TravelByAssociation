@@ -1,13 +1,14 @@
 GEM
   remote: http://rubygems.org/
   specs:
+    crack (0.1.8)
     diff-lcs (1.1.2)
     haml (3.1.1)
+    httparty (0.7.8)
+      crack (= 0.1.8)
     json (1.5.1)
     rack (1.2.2)
     rack-flash (0.1.1)
-      rack
-    rack-proxy (0.3.4)
       rack
     rspec (2.6.0)
       rspec-core (~> 2.6.0)
@@ -31,9 +32,9 @@ PLATFORMS
 
 DEPENDENCIES
   haml
+  httparty
   json
   rack-flash
-  rack-proxy
   rspec
   shotgun
   sinatra

@@ -29,8 +29,8 @@ tba.Transits = new Mote.Collection(function() {
 tba.Trips = new Mote.Collection(function() {
 	
 	this.use(Mote.EmbeddedDocuments);
-	this.use(Mote.Rest);
-		
+	this.use(Mote.REST);
+	
 	this.name = 'trips';
 	this.keys = [
 		'name',

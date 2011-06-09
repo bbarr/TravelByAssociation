@@ -1,5 +1,5 @@
 require "./lib/tba.rb"
-require "rack/proxy"
+require "./mongo_lab.rb"
 
 use Rack::Session::Cookie
 use Rack::Flash
@@ -19,7 +19,6 @@ map "/trips" do
 	run TBA::Trips
 end
 
-map "/api" do
-
-	run proc{|env| [200, {"Content-Type" => "text/plain"}, ["Ha ha ha"]] }
+map "/db" do
+	run MongoLab.new
 end

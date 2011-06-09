@@ -33,6 +33,10 @@ Mote.Collection.prototype = {
 		if (feature.collection) {
 			util.extend(this, feature.collection);
 		}
+		
+		if (feature.initialize) {
+			feature.initialize();
+		}
 	},
 	
 	uid: function() {
