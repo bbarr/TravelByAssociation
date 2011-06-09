@@ -29,7 +29,9 @@ tba.Transits = new Mote.Collection(function() {
 tba.Trips = new Mote.Collection(function() {
 	
 	this.use(Mote.EmbeddedDocuments);
-	this.use(Mote.REST);
+	this.use(Mote.REST, function(rest) {
+		rest.base_uri = '/db';
+	});
 	
 	this.name = 'trips';
 	this.keys = [

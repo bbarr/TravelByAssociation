@@ -16,7 +16,7 @@ var tba = {};
 			
 			var uri = scripts[index];
 			if (!uri) {
-				tba.app.publish('ready');
+				Fugue.publish('ready');
 				return;
 			}
 

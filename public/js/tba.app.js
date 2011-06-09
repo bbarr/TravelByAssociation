@@ -3,7 +3,7 @@ tba.app = Fugue.create('app', document.body);
 tba.app.extend({
 	
 	load: function(hash) {
-		this.current_trip.data['x'] = 'y';
+		this.current_trip.set('x', 'y');
 		this.current_trip.save();
 		this.current_trip.persist();
 	},
@@ -21,12 +21,9 @@ tba.app.extend({
 	}
 });
 
-tba.app.subscribe('app.ready', function() {
-	
+tba.app.subscribe('ready', function() {
 	this.current_trip = new tba.Trips.Document;
-
 	this.refresh();
-	
 });
 
 tba.map = Fugue.create('map');

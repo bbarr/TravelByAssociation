@@ -21,11 +21,13 @@ Mote.Collection = function(block) {
 
 Mote.Collection.prototype = {
 	
-	use: function(Feature) {
+	use: function(Feature, block) {
 		
 		var util = Mote.Util,
 			feature = new Feature;
-			
+
+		if (block) block(feature);
+	
 		if (feature.document) {
 			util.extend(this._document_prototype, feature.document);
 		}
@@ -34,9 +36,6 @@ Mote.Collection.prototype = {
 			util.extend(this, feature.collection);
 		}
 		
-		if (feature.initialize) {
-			feature.initialize();
-		}
 	},
 	
 	uid: function() {
