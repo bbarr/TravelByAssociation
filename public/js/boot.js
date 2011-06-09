@@ -8,7 +8,6 @@ var tba = {};
 		scripts = [
 			'lib/mote.js',
 			'lib/fugue.js',
-			'mote.rest.js',
 			'tba.app.js',
 			'tba.collections.js'
 		],
