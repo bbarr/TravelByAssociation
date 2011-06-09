@@ -146,6 +146,21 @@ Mote.Document.prototype = {
         doc.id = this.id;
         doc.is_new = this.is_new;
 		return doc;
+	},
+
+	to_json: function() {
+
+		var data = this.data,
+		    keys = this.collection.keys,
+		    json = {};
+	
+		for (key in data) {
+			if (keys.indexOf(key) > -1) {
+				json[key] = data[key];
+			}
+		}
+
+		return json;
 	}
 }
 
@@ -265,6 +280,7 @@ Mote.REST = function() {
 				url: self.collection.generate_uri(_id),
 				method: 'GET',
 				complete: function(data) {
+					self.load(data);
 					console.log(data);
 				});
 			});
@@ -275,7 +291,7 @@ Mote.REST = function() {
 			var self = this,
 			    method,
 			    url;
-
+			
 			if (this.is_persisted()) {
 				method = 'PUT';
 				url = this.collection.generate_uri(this.data['_id']);
@@ -287,7 +303,7 @@ Mote.REST = function() {
 
 			this.ajax({
 				url: url,
-				data: self.data,
+				data: self.to_json(),
 				type: method,
 				complete: function(data) {
 					console.log(data);
