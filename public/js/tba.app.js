@@ -3,9 +3,12 @@ tba.app = Fugue.create('app', document.body);
 tba.app.extend({
 	
 	load: function(hash) {
-		this.current_trip.set('x', 'y');
-		this.current_trip.save();
-		this.current_trip.persist();
+		this.current_trip.x = 'y';
+		tba.Trips.save(this.current_trip);
+		tba.Trips.remote.persist(this.current_trip);
+		this.current_trip.hell = 'yea';
+		tba.Trips.save(this.current_trip);
+		tba.Trips.remote.persist(this.current_trip);
 	},
 	
 	refresh: function() {
@@ -21,8 +24,8 @@ tba.app.extend({
 	}
 });
 
-tba.app.subscribe('ready', function() {
-	this.current_trip = new tba.Trips.Document;
+tba.app.subscribe('app.ready', function() {
+	this.current_trip = {};
 	this.refresh();
 });
 
