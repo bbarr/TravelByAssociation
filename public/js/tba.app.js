@@ -3,12 +3,10 @@ tba.app = Fugue.create('app', document.body);
 tba.app.extend({
 	
 	load: function(hash) {
-		this.current_trip.x = 'y';
-		tba.Trips.save(this.current_trip);
-		tba.Trips.remote.persist(this.current_trip);
-		this.current_trip.hell = 'yea';
-		tba.Trips.save(this.current_trip);
-		tba.Trips.remote.persist(this.current_trip);
+		var test = new tba.Trips.Document();
+		test.x = 'y';
+		test.save();
+		test.persist();
 	},
 	
 	refresh: function() {
@@ -18,14 +16,17 @@ tba.app.extend({
 
 		if (hash) {
 			hash = hash.substr(1);
-			this.load(hash);
+			var self = this;
+			tba.Trips.fetch(hash, function(doc) {
+				self.current_trip = doc;
+				self.load(hash);
+			});
 		}
 		
 	}
 });
 
 tba.app.subscribe('app.ready', function() {
-	this.current_trip = {};
 	this.refresh();
 });
 

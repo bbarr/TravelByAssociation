@@ -10,8 +10,7 @@
  */
 
 var Mote = {
-	version: '0.1',
-	collections: {}
+	version: '0.1'
 };
 
 Mote.Collection = function(block) {
@@ -24,23 +23,33 @@ Mote.Collection = function(block) {
 	this.name = '';
 	this.keys = [];
 
+	this.documents = {};
+	this.Document = function(data) {
+		var extend = Mote.Util.extend;
+		this.name = Mote.Naming.singularize(self.name);
+		this.collection = self;
+		extend(this, self.Document.initial, true);
+		extend(this, data);
+	}
+
+	this.Document.initial = {};
+	this.Document.prototype = Mote.Util.clone(Mote.DocumentPrototype);
+	
 	// run user provided initialization
 	block.call(this, this);
 
 	if (this.name === '') throw new Exception('Collection requires a name');
-
-	this.documents = {};
-	Mote.collections[this.name] = this;
 }
 
 Mote.Collection.prototype = {
 	
 	use: function(Feature, block) {
+
 		var feature = new Feature(this);
 
 		// optional custom init
 		if (block) block.call(this, feature);
-		
+
 		Mote.Util.extend(this, feature);
 	},
 	
@@ -100,11 +109,38 @@ Mote.Collection.prototype = {
 		return doc._mote_id;
 	},
 	
-	generate_json: function(doc) {
-		return doc;
+	validate: function() { return true }
+}
+
+Mote.DocumentPrototype = {
+
+	save: function() {
+		return this.collection.save(this);
+	},
+
+	to_json: function() {
+		
+		var keys = this.collection.keys,
+		    json = {},
+		    key,
+		    prop;
+
+		for (key in this) {
+			if (keys.indexOf(key) > -1) {
+				prop = this[key];
+				prop = prop.to_json ? prop.to_json() : prop;
+				json[key] = prop;
+			}
+		}
+		
+		return JSON.stringify(json);
 	},
 	
-	validate: function() { return true }
+	clone: function() {
+		var clone = {};
+		Mote.Util.extend(clone, this, true);
+		return clone;
+	}
 }
 
 Mote.Naming = {
@@ -129,22 +165,43 @@ Mote.Naming = {
 }
 
 Mote.EmbeddedDocuments = function(col) {
-	this.embeddable = [];
+	
+	Mote.Util.extend(col.Document.prototype, {
+		
+		embed: function(doc) {
+
+			var doc_name = doc.name,
+			    col_name = doc.collection.name,
+			    keys = this.collection.keys,
+			    len = keys.length,
+			    i = 0,
+			    key;
+
+			for (; i < len; i++) {
+				key = keys[i];
+				if (key === doc_name) {
+  				    this[key] = doc;
+			    }
+				else if (key === col_name) {
+				    this[key].push(doc);
+				}
+			}
+		}
+	});
 };
 
 Mote.EmbeddedDocuments.prototype = {
 
-	_embeds: function(name) {
-		this.embeddable.push(name);
-		this.keys.push(name);
-	},
-
     embeds_many: function(col) {
-		this._embeds(col.name);
+		var name = col.name;
+		this.keys.push(name);
+		this.Document.initial[name] = [];
     },
     
     embeds_one: function(col) {
-		this._embeds(Mote.Naming.singularize(col.name));
+		var name = Mote.Naming.singularize(col.name)
+		this.keys.push(name);
+		this.Document.initial[name] = {};
     }
 }
 
@@ -152,10 +209,36 @@ Mote.REST = function(col) {
 	
 	this.base_uri = '';
 	this.ajax = ($) ? $.ajax : function() { return true; };
-	this.collection = col;
 	
-	var ns = { remote: this };
-	return ns;
+	Mote.Util.extend(col.Document.prototype, {
+		
+		persist: function() {
+
+			var self = this,
+				col = this.collection,
+			    method,
+			    url;
+
+			if (this['_id']) {
+				method = 'PUT';
+				url = col.generate_uri(this['_id']);
+			}
+			else {
+				method = 'POST';
+				url = col.generate_uri();
+			}
+
+			col.ajax({
+				url: url,
+				data: self.to_json(),
+				contentType: 'application/json',
+				type: method,
+				success: function(data) {
+					
+				}
+			});
+		}
+	});
 }
 
 Mote.REST.prototype = {
@@ -177,79 +260,84 @@ Mote.REST.prototype = {
 		
 	generate_uri: function(segments, query) {	
 
-		var uri = [this.base_uri, this.collection.name];
-
-		if (query) {
-			uri = this._append_segments(uri, segments);
-			uri = this._append_query(uric, query);
+		var uri = [this.base_uri, this.name];
+		
+		if (segments) {
+			
+			if (query) {
+				uri = this._append_segments(uri, segments);
+				uri = this._append_query(uri, query);
+			}
+			else {
+				if (segments[0]) uri = this._append_segments(uri, segments);
+				else uri = this._append_query(uri, segments);
+			}
 		}
-		else if (segments) {
-			if (segments[0]) uri = this._append_segments(uri, segments);
-			else uri = this._append_query(uri, segments);				
-		} 
-
+		
 		return uri.join('/');
 	},
 
-	query: function(query) {
+	query: function(query, cb) {
 		var self = this;
 		this.ajax({
 			url: self.collection.generate_uri(query),
 			method: 'GET',
-			complete: function(data) {
-				console.log(data);
+			success: function(data) {
+				cb(data);
 			}
 		});
 	},
 	
-	load: function(_id) {
+	fetch: function(_id, cb) {
 		var self = this;
 		this.ajax({
-			url: self.collection.generate_uri(_id),
+			url: self.generate_uri(_id),
 			method: 'GET',
-			complete: function(data) {
-				self.load(data);
-				console.log(data);
-			}
-		});
-	},
-	
-	persist: function(doc) {
-
-		var self = this,
-		    method,
-		    url;
-		
-		if (this.persisted(doc)) {
-			method = 'PUT';
-			url = this.generate_uri(doc['_id']);
-		}
-		else {
-			method = 'POST';
-			url = this.generate_uri();
-		}
-
-		this.ajax({
-			url: url,
-			data: self.collection.generate_json(doc),
-			type: method,
-			dataType: 'json',
 			success: function(data) {
-				Mote.Util.extend(doc, data);
+				cb(data);
 			}
 		});
-	},
-	
-	persisted: function(doc) {
-		return typeof doc['_id'] !== 'undefined';
 	}
 }
 
 Mote.Util = {
 	
 	extend: function(dest, src) {
-		var key;
-		for (key in src) dest[key] = src[key];
+		for (var key in src) dest[key] = src[key];
+		return dest;
+	},
+
+	is_defined: function(subject) { return subject !== undefined && subject !== null },
+
+	is_array: function(subject) { return subject.constructor.toString().indexOf('Array') > -1 },
+
+	is_object: function(subject) { return subject && typeof subject === 'object' && typeof subject.length === 'undefined' },
+
+	extend: function(dest, src, deep) {
+		
+		if (!src) return dest;
+		
+		var needs_recursive = false,
+		    key,
+		    prop,
+		    util = Mote.Util;
+
+		for (key in src) {
+			prop = src[key];
+
+			if (!util.is_defined(prop)) continue;
+
+			if (deep) {
+				
+				needs_recursive = true;
+				if (util.is_array(prop)) dest[key] = [];
+				else if (util.is_object(prop)) dest[key] = {};
+				else needs_recursive = false;
+			}
+			
+			dest[key] = (needs_recursive) ? util.extend(dest[key], prop, true) : prop;
+		}
+
 		return dest;
 	},
 	

@@ -1,8 +1,8 @@
 require "./lib/tba.rb"
-require "./mongo_lab.rb"
 
 use Rack::Session::Cookie
 use Rack::Flash
+use Rack::PostBodyContentTypeParser
 
 use Warden::Manager do |manager|
 	manager.default_strategies :password
@@ -20,5 +20,5 @@ map "/trips" do
 end
 
 map "/db" do
-	run MongoLab.new
+	run TBA::JSONProxy.new
 end
