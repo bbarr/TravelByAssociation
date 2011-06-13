@@ -30,14 +30,12 @@ tba.Trips = new Mote.Collection(function() {
 	
 	this.use(Mote.EmbeddedDocuments);
 	this.use(Mote.REST, function(rest) {
-		
-		// Mote.REST namespaces itself under 'remote'
-		rest.base_uri = '/db';
+		// Mote.REST namespaces to .remote
+		rest.remote.base_uri = '/db'; 
 	});
 
 	this.name = 'trips';
 	this.keys = [
-		'k',
 		'name',
 		'start_date',
 		'start_location'

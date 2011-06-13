@@ -23,16 +23,18 @@ Mote.Collection = function(block) {
 	this.name = '';
 	this.keys = [];
 
+	Mote.Util.extend(this, new Mote.Publisher);
+
 	this.documents = {};
 	this.Document = function(data) {
 		var extend = Mote.Util.extend;
-		this.name = Mote.Naming.singularize(self.name);
-		this.collection = self;
+		this._collection = self;
 		extend(this, self.Document.initial, true);
 		extend(this, data);
 	}
 
 	this.Document.initial = {};
+	Mote.Util.extend(this.Document.initial, new Mote.Publisher);
 	this.Document.prototype = Mote.Util.clone(Mote.DocumentPrototype);
 	
 	// run user provided initialization
@@ -51,14 +53,11 @@ Mote.Collection.prototype = {
 		if (block) block.call(this, feature);
 
 		Mote.Util.extend(this, feature);
-	},
-	
-	uid: function() {
-		var count = 0;
-		return function() {
-			return (count++).toString();
+		
+		if (Feature.document_prototype) {
+			Mote.Util.extend(this.Document.prototype, Feature.document_prototype);
 		}
-	}(),
+	},
 	
 	find: function(queries, limit) {
 
@@ -104,45 +103,123 @@ Mote.Collection.prototype = {
 	
 	save: function(doc) {
 		if (!this.validate(doc)) return false;
-		doc._mote_id || (doc._mote_id = this.uid());
-		this.documents[doc._mote_id] = doc;
+		doc._mote_id || (doc._mote_id = this._generate_mote_id());
+		this.documents[doc._mote_id] = doc.clone();
 		return doc._mote_id;
 	},
 	
-	validate: function() { return true }
+	validate: function() { return true },
+	
+	_generate_mote_id: function() {
+		var count = 0;
+		return function() {
+			return (count++).toString();
+		}
+	}(),
 }
 
+/**
+ *
+ *
+ *
+ */
+Mote.Publisher = function() {
+	this.subscriptions = { '*': [] };
+}
+
+Mote.Publisher.prototype = {
+	
+	subscribe: function(topic, fn) {
+		
+		if (typeof topic === 'function') {
+			fn = topic;
+			topic = '*';
+		}
+		
+		(this.subscriptions[topic] || (this.subscriptions[topic] = [])).push(fn);
+	},
+	
+	publish: function(topic, data) {
+
+		var subs = (this.subscriptions[topic] || []).concat(this.subscriptions['*']),
+			len = subs.length,
+			i = 0;
+
+		for (; i < len; i++) subs[i](data);
+	}
+}
+
+
+
+/**
+ *
+ *
+ *
+ */
 Mote.DocumentPrototype = {
 
 	save: function() {
-		return this.collection.save(this);
+		return this._collection.save(this);
+	},
+	
+	saved: function() {
+		return !!this['_mote_id'];
+	},
+
+	collapse: function() {
+		
+		var keys = this._collection.keys,
+			collapsed = {},
+			key,
+			prop,
+			embedded,
+			embedded_prop,
+			len,
+			i;
+			
+		for (key in this) {
+			
+			prop = this[key];
+			
+			if (keys.indexOf(key) === -1) continue;
+			
+			if (Mote.Util.is_array(prop)) {
+				embedded = [];
+				for (i = 0, len = prop.length; i < len; i++) {
+					embedded_prop = prop[i];
+					embedded.push(embedded_prop.collapse ? embedded_prop.collapse() : embedded_prop);
+				}
+				collapsed[key] = embedded;
+			}
+			else collapsed[key] = prop.collapse ? prop.collapse() : prop;
+		}
+		
+		return collapsed;
 	},
 
 	to_json: function() {
-		
-		var keys = this.collection.keys,
-		    json = {},
-		    key,
-		    prop;
-
-		for (key in this) {
-			if (keys.indexOf(key) > -1) {
-				prop = this[key];
-				prop = prop.to_json ? prop.to_json() : prop;
-				json[key] = prop;
-			}
-		}
-		
-		return JSON.stringify(json);
+		var collapsed = this.collapse();
+		return JSON.stringify(collapsed);
 	},
 	
 	clone: function() {
-		var clone = {};
+
+		var clone = {},
+			col = this._collection;
+
+		delete this._collection;
 		Mote.Util.extend(clone, this, true);
+		this._collection = clone._collection = col;
 		return clone;
 	}
 }
 
+
+
+/**
+ *
+ *
+ */
 Mote.Naming = {
 
     singular: [],
@@ -164,31 +241,13 @@ Mote.Naming = {
     }
 }
 
-Mote.EmbeddedDocuments = function(col) {
-	
-	Mote.Util.extend(col.Document.prototype, {
-		
-		embed: function(doc) {
 
-			var doc_name = doc.name,
-			    col_name = doc.collection.name,
-			    keys = this.collection.keys,
-			    len = keys.length,
-			    i = 0,
-			    key;
 
-			for (; i < len; i++) {
-				key = keys[i];
-				if (key === doc_name) {
-  				    this[key] = doc;
-			    }
-				else if (key === col_name) {
-				    this[key].push(doc);
-				}
-			}
-		}
-	});
-};
+
+/**
+ *
+ */
+Mote.EmbeddedDocuments = function(col) {};
 
 Mote.EmbeddedDocuments.prototype = {
 
@@ -205,40 +264,46 @@ Mote.EmbeddedDocuments.prototype = {
     }
 }
 
+Mote.EmbeddedDocuments.document_prototype = {
+	
+	embed: function(doc) {
+
+		var col_name = doc._collection.name,
+			doc_name = Mote.Naming.singularize(col_name),
+		    keys = this._collection.keys,
+		    len = keys.length,
+		    i = 0,
+		    key;
+
+		for (; i < len; i++) {
+			key = keys[i];
+			if (key === doc_name) {
+			    this[key] = doc;
+		    }
+			else if (key === col_name) {
+			    this[key].push(doc);
+			}
+		}
+	}
+};
+
+
+
+/**
+ *
+ *
+ *
+ */
 Mote.REST = function(col) {
 	
-	this.base_uri = '';
-	this.ajax = ($) ? $.ajax : function() { return true; };
+	// use something predefined or try to grab something jquery-ish
+	Mote.REST.ajax || (Mote.REST.ajax = ($) ? $.ajax : function() { return true; });
 	
-	Mote.Util.extend(col.Document.prototype, {
-		
-		persist: function() {
-
-			var self = this,
-				col = this.collection,
-			    method,
-			    url;
-
-			if (this['_id']) {
-				method = 'PUT';
-				url = col.generate_uri(this['_id']);
-			}
-			else {
-				method = 'POST';
-				url = col.generate_uri();
-			}
-
-			col.ajax({
-				url: url,
-				data: self.to_json(),
-				contentType: 'application/json',
-				type: method,
-				success: function(data) {
-					
-				}
-			});
-		}
-	});
+	this.base_uri = '';
+	this.collection = col;
+	
+	// namespace under 'remote'
+	return { remote: this };
 }
 
 Mote.REST.prototype = {
@@ -255,7 +320,9 @@ Mote.REST.prototype = {
 		for (key in query) query_string += (key + '=' + query[key].toString() + '&');
 
 		query_string = query_string.substr(0, query_string.length - 1);
-		uri.append(query_string);
+		uri.push(query_string);
+
+		return uri;
 	},
 		
 	generate_uri: function(segments, query) {	
@@ -279,8 +346,8 @@ Mote.REST.prototype = {
 
 	query: function(query, cb) {
 		var self = this;
-		this.ajax({
-			url: self.collection.generate_uri(query),
+		Mote.REST.ajax({
+			url: self._collection.generate_uri(query),
 			method: 'GET',
 			success: function(data) {
 				cb(data);
@@ -290,7 +357,7 @@ Mote.REST.prototype = {
 	
 	fetch: function(_id, cb) {
 		var self = this;
-		this.ajax({
+		Mote.REST.ajax({
 			url: self.generate_uri(_id),
 			method: 'GET',
 			success: function(data) {
@@ -300,18 +367,60 @@ Mote.REST.prototype = {
 	}
 }
 
+Mote.REST.document_prototype = {
+	
+	save: function() {
+
+		var self = this,
+			col = this._collection,
+		    method,
+		    url;
+
+		if (this.saved()) {
+			method = 'PUT';
+			url = col.generate_uri(this['_id']['$oid']);
+		}
+		else {
+			method = 'POST';
+			url = col.generate_uri();
+		}
+
+		Mote.REST.ajax({
+			url: url,
+			data: self.to_json(),
+			contentType: 'application/json',
+			type: method,
+			success: function(data) {
+				
+			}
+		});
+	},
+	
+	saved: function() {
+		return this['_id'] && this['_id']['$oid'];
+	}
+}
+
+
+/**
+ *
+ *
+ */
 Mote.Util = {
 	
-	extend: function(dest, src) {
-		for (var key in src) dest[key] = src[key];
-		return dest;
-	},
-
 	is_defined: function(subject) { return subject !== undefined && subject !== null },
 
 	is_array: function(subject) { return subject.constructor.toString().indexOf('Array') > -1 },
 
 	is_object: function(subject) { return subject && typeof subject === 'object' && typeof subject.length === 'undefined' },
+
+	clone: function() {
+		var F = function() {};
+		return function(o) {
+			F.prototype = o;
+			return new F;
+		}
+	}(),
 
 	extend: function(dest, src, deep) {
 		
@@ -339,13 +448,5 @@ Mote.Util = {
 		}
 
 		return dest;
-	},
-	
-	clone: function() {
-		var F = function() {};
-		return function(o) {
-			F.prototype = o;
-			return new F;
-		}
-	}()
+	}
 };
