@@ -1,8 +1,9 @@
 
+Fugue.state_toggler('loading', 'loaded', 'is_loading');
+
 tba.app = Fugue.create('app', document.body, {
 
 	ready: function() {
-		this.refresh();
 		tba.flash.notice('Welcome to Travel By Association! Plan your trip and get advice from people who probably care about you somehow.');
 		this.publish('ready');
 	}

@@ -29,9 +29,10 @@ tba.Transits = new Mote.Collection(function() {
 tba.Trips = new Mote.Collection(function() {
 	
 	this.use(Mote.EmbeddedDocuments);
-	this.use(Mote.REST, function(rest) {
+	this.use(Mote.Remote, function(ns) {
+		
 		// Mote.REST namespaces to .remote
-		rest.remote.base_uri = '/db'; 
+		ns.Remote.base_uri = '/db'; 
 	});
 
 	this.name = 'trips';
@@ -44,5 +45,4 @@ tba.Trips = new Mote.Collection(function() {
 	this.embeds_many(tba.Locations);
 	this.embeds_many(tba.Transits);
 	this.embeds_many(tba.Associates);
-	
 });

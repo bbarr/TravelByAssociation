@@ -14,7 +14,7 @@
 			
 			var uri = scripts[index];
 			if (!uri) {
-				tba.app.ready();
+				tba.init();
 				return;
 			}
 

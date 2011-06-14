@@ -41,6 +41,9 @@
 
 			var key,
 				prop,
+				event_key,
+				event_prop,
+				event_type,
 				events;
 
 			for (key in obj) {
@@ -197,5 +200,5 @@
 		// END PRIVATE
 	}
 	
-	window.Fugue = new Widget('base', document.body);
+	window.Fugue = new Widget('base', document.body, {});
 })();
