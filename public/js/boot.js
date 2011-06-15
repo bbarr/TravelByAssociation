@@ -1,3 +1,7 @@
+
+// project namespace
+var tba = {};
+
 // dynamically load everything we need... 
 // will likely replace this with a "real" require solution
 (function() {
@@ -6,15 +10,14 @@
 		scripts = [
 			'lib/mote.js',
 			'lib/fugue.js',
-			'tba.js',
-			'tba.widgets.js',
-			'tba.collections.js'
+			'tba.collections.js',
+			'tba.widgets.js'
 		],
 		dequeue = function() {
 			
 			var uri = scripts[index];
 			if (!uri) {
-				tba.init();
+				tba.app.ready();
 				return;
 			}
 

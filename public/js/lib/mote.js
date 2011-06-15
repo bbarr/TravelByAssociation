@@ -26,7 +26,8 @@ Mote.Collection = function(block) {
 	Mote.Util.extend(self, new Mote.Publisher);
 	Mote.Util.extend(self, Mote.Collection.prototype);
 
-	self.documents = {};
+	self.length = 0;
+	self.documents = [];
 	self.Document = function(data) {
 
 		var extend = Mote.Util.extend;
@@ -46,27 +47,26 @@ Mote.Collection = function(block) {
 	block.call(self, self);
 
 	if (self.name === '') throw new Exception('Collection requires a name');
-
-	return self;
 }
 
 Mote.Collection.prototype = {
 	
-	use: function(Feature, block) {
+	plugin: function(Feature, block) {
 
-		var feature = new Feature(this);
+		var feature = new Feature(this),
+		    extend = Mote.Util.extend;
 
 		// optional custom init
 		if (block) block.call(this, feature);
 
-		Mote.Util.extend(this, feature);
+		extend(this, feature);
 
 		if (Feature.document_initial) {
-			Mote.Util.extend(this.Document.initial, Feature.document_initial);
+			extend(this.Document.initial, Feature.document_initial, true);
 		}			
 
 		if (Feature.document_prototype) {
-			Mote.Util.extend(this.Document.prototype, Feature.document_prototype);
+			extend(this.Document.prototype, Feature.document_prototype);
 		}
 	},
 	
@@ -84,7 +84,7 @@ Mote.Collection.prototype = {
 			match = true;			
 			
 			for (key in queries) {
-				if (doc.data[key] != queries[key]) {
+				if (queries[key] === '*' || doc.data[key] != queries[key]) {
 					match = false;
 					break;
 				}
@@ -101,34 +101,121 @@ Mote.Collection.prototype = {
 
 		return matches;
 	},
-	
+
 	find_one: function(query) {
-		var matches = this.find(query, 1);
-		return matches[0];
+		return this.find(query, 1)[0];
 	},
-	
-	contains: function(doc) {
-		if (!doc._mote_id) return false;
-		return !!this.documents[doc._mote_id];
+
+	index_of: function(doc) {
+
+		var index = -1,
+		    doc_id = doc._mote_id,
+		    docs = this.documents,
+		    len = docs.length,
+   		    i = 0;
+
+		if (!doc_id) return index;		
+
+		for (; i < len; i++) {
+			if (docs[i]._mote_id === doc_id) {
+				index = i;
+				break;
+			}
+		}
+
+		return index;
 	},
-	
-	save: function(doc) {
+
+	insert: function(doc) {
 		if (!this.validate(doc)) return false;
-		doc._mote_id || (doc._mote_id = this._generate_mote_id());
-		var clone = doc.clone();
-		this.documents[doc._mote_id] = clone;
-		return doc._mote_id;
+		if (doc._mote_id) return false;
+		doc._mote_id = this._generate_mote_id();
+		this.documents.push(doc.clone());
+		return doc;
+	},
+
+	update: function(doc) {
+		if (!doc._mote_id) return false;
+		var index = this.index_of(doc);
+		if (index > -1) {
+			this.documents.splice(index, 1, doc.clone());
+			return doc;
+		}
+		else return false
+	},
+
+	remove: function(doc) {
+		if (doc._mote_id) return false;
+		var index = this.index_of(doc);
+		if (index > -1) {
+			this.documents.splice(index, 1);
+			return this.documents.length;
+		}
+		else return false;
 	},
 	
 	validate: function() { return true },
 	
+	collapse: function() {
+
+		var docs = this.documents,
+			collapsed = [],
+			len = docs.length,
+			i = 0;
+
+		for (; i < len; i++) {
+			collapsed.push(docs[i].collapse());
+		}
+		
+		return collapsed;
+	},
+
 	_generate_mote_id: function() {
 		var count = 0;
 		return function() {
 			return (count++).toString();
 		}
-	}(),
+	}()
 }
+
+/**
+ *
+ *
+ *
+ */
+Mote.Document = {
+
+	save: function() {
+		return this.collection[this._mote_id ? 'update' : 'insert'](this);
+	},
+
+	collapse: function() {
+
+		var data = this.data,
+		    keys = this.collection.keys,
+		    collapsed = {},
+		    key;
+
+		for (key in data) {
+			if (keys.indexOf(key) === -1) continue;
+			collapsed[key] = typeof data[key].collapse === 'function' ? data[key].collapse() : data[key];
+		}
+
+		return collapsed;
+	},
+
+	to_json: function() {
+		var collapsed = this.collapse();
+		return JSON.stringify(collapsed);
+	},
+	
+	clone: function() {
+		var clone = new this.collection.Document(this.data);
+		clone._mote_id = this._mote_id;
+		return clone;
+	}
+}
+
 
 /**
  *
@@ -161,66 +248,6 @@ Mote.Publisher.prototype = {
 	}
 }
 
-
-
-/**
- *
- *
- *
- */
-Mote.Document = {
-
-	save: function() {
-		return this.collection.save(this);
-	},
-	
-	saved: function() {
-		return !!this['_mote_id'];
-	},
-
-	collapse: function() {
-		
-		var keys = this.collection.keys,
-			collapsed = {},
-			data = this.data,
-			key,
-			prop,
-			embedded,
-			embedded_prop,
-			len,
-			i;
-			
-		for (key in data) {
-			
-			prop = data[key];
-			
-			if (keys.indexOf(key) === -1) continue;
-			
-			if (Mote.Util.is_array(prop)) {
-				embedded = [];
-				for (i = 0, len = prop.length; i < len; i++) {
-					embedded_prop = prop[i];
-					embedded.push(embedded_prop.collapse ? embedded_prop.collapse() : embedded_prop);
-				}
-				collapsed[key] = embedded;
-			}
-			else collapsed[key] = prop.collapse ? prop.collapse() : prop;
-		}
-		
-		return collapsed;
-	},
-
-	to_json: function() {
-		var collapsed = this.collapse();
-		return JSON.stringify(collapsed);
-	},
-	
-	clone: function() {
-		var clone = new this.collection.Document(this.data);
-		clone._mote_id = this._mote_id;
-		return clone;
-	}
-}
 
 
 
@@ -284,7 +311,7 @@ Mote.EmbeddedDocuments.document_prototype = {
 		for (; i < len; i++) {
 			key = keys[i];
 			if (key === col_name || key === doc_name) {
-			    return this.data[key].save(doc);
+			    return doc.save();
 			}
 		}
 		
@@ -328,7 +355,7 @@ Mote.Remote.prototype = {
 	generate_uri: function(segments, query) {	
 
 		var uri = [this.base_uri, this.name];
-		
+
 		if (segments) {
 			
 			if (query) {
@@ -345,59 +372,62 @@ Mote.Remote.prototype = {
 	},
 
 	query: function(query, cb) {
-		var self = this;
-		Mote.Remote.ajax({
-			url: self.generate_uri(query),
-			method: 'GET',
-			success: function(data) {
-				cb(data);
-			}
-		});
+		this.subscribe('query_success', cb);
+		this._make_request('query', 'GET', this.generate_uri(query));
 	},
 	
 	fetch: function(_id, cb) {
-		var self = this;
-		Mote.Remote.ajax({
-			url: self.generate_uri(_id),
-			method: 'GET',
-			success: function(data) {
-				cb(data);
-			}
-		});
+		this.subscribe('fetch_success', cb);
+		this._make_request('fetch', 'GET', this.generate_uri(_id));
+	},
+	
+	persist: function(doc) {
+		
+		var method,
+		    url,
+		    mongo_id = doc.get_mongo_id();
+
+		if (mongo_id) {
+			method = 'PUT';
+			url = this.generate_uri(mongo_id);
+		}
+		else {
+			method = 'POST';
+			url = this.generate_uri();
+		}
+
+		this._make_request('persist', method, url, doc.to_json());
+	},
+	
+	_make_request: function(action, method, url, data) {
+
+		var self = this,
+			request = {
+				url: url,
+				method: method,				
+				success: function(data) { self.publish(action + '_success', data) },
+				error: function(xhr) { self.publish(action + '_error', xhr) },
+				complete: self.dequeue
+			};
+			
+		if (data) {
+			request.data = data;
+			request.contentType = 'application/json';
+		}
+
+		Mote.Remote.ajax(request);
 	}
 }
 
 Mote.Remote.document_prototype = {
 	
 	persist: function() {
-
-		var self = this,
-		    col = this.collection,
-		    method,
-		    url;
-
-		if (this.saved()) {
-			method = 'PUT';
-			url = col.generate_uri(this.data['_id']['$oid']);
-		}
-		else {
-			method = 'POST';
-			url = col.generate_uri();
-		}
-
-		Mote.Remote.ajax({
-			url: url,
-			data: self.to_json(),
-			contentType: 'application/json',
-			type: method,
-			success: function(data) {
-				
-			}
-		});
+		if (!this.save()) return false;
+		this.collection.persist(this);
 	},
 	
-	saved: function() {
-		return this.data['_id'] && this.data['_id']['$oid'];
+	get_mongo_id: function() {
+		if (this.data['_id']) return this.data['_id']['$oid'];
 	}
 }
 

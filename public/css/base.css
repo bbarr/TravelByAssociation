@@ -15,6 +15,21 @@ body {
 	border: 1px solid #000;
 }
 
+#backdrop {
+	background: #fff;
+	opacity: .4;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: none;
+}
+
+.is_loading #backdrop {
+	display: block;
+}
+
 .hide {
 	display: none !important;
 }

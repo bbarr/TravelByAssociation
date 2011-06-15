@@ -14,9 +14,10 @@ class TBA::JSONProxy
 	  
 	  method = request.request_method.downcase
 	  path = request.path_info
+	  body = request.params.to_json
 
 	  response = self.class.send(method, path, { 
-	    :body => request.params.to_json,
+	    :body => body,
 	    :query => api_key_hash,
 	    :headers => { 'Content-Type' => 'text/plain' } 
 	  })

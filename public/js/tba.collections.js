@@ -28,11 +28,9 @@ tba.Transits = new Mote.Collection(function() {
 
 tba.Trips = new Mote.Collection(function() {
 	
-	this.use(Mote.EmbeddedDocuments);
-	this.use(Mote.Remote, function(ns) {
-		
-		// Mote.REST namespaces to .remote
-		ns.Remote.base_uri = '/db'; 
+	this.plugin(Mote.EmbeddedDocuments);
+	this.plugin(Mote.Remote, function(remote) {
+		remote.base_uri = '/db'; 
 	});
 
 	this.name = 'trips';
