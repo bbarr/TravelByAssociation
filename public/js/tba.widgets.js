@@ -8,12 +8,12 @@ tba.app = Fugue.create('app', document.body, {
 	init: function() {
 		
 		var self = this;
-		
+
 		tba.Trips.subscribe('fetch_success', function(data) {
 			tba.current_trip = new tba.Trips.Document(data);
 			self.publish('ready');
 		});
-		
+
 		this.subscribe('ready', this.loaded);
 	},
 	
@@ -48,15 +48,12 @@ tba.flash = Fugue.create('flash', {
 	events: {
 		'li click': function(e) {
 			$(e.currentTarget).addClass('hide');
+		},
+		'app.ready': function(e) {
+			this.notice('Welcome to Travel By Association! Plan your trip and get advice from people who probably care about you somehow.');
 		}
 	},
-	
-	init: function() {
-		this.subscribe('app.ready', function() {
-			this.notice('Welcome to Travel By Association! Plan your trip and get advice from people who probably care about you somehow.');
-		});
-	},
-	
+
 	notice: function(msg) {
 		this.deliver('notice', msg);
 	},

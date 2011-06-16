@@ -372,12 +372,10 @@ Mote.Remote.prototype = {
 	},
 
 	query: function(query, cb) {
-		this.subscribe('query_success', cb);
 		this._make_request('query', 'GET', this.generate_uri(query));
 	},
 	
 	fetch: function(_id, cb) {
-		this.subscribe('fetch_success', cb);
 		this._make_request('fetch', 'GET', this.generate_uri(_id));
 	},
 	

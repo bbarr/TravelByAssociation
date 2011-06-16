@@ -62,7 +62,12 @@
 					query = event_key.split(' ');
 					event_type = query.pop();
 					cb = typeof event_prop === 'string' ? this[event_prop] : event_prop;
-					this.delegate(query.join(''), event_type, cb);
+					if (query.length > 1) {
+						this.delegate(query.join(''), event_type, cb);
+					} 
+					else {
+						this.subscribe(event_type, cb);
+					}
 				}
 			}
 			return this;
