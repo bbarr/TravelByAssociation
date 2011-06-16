@@ -1,0 +1,4 @@
+tba.app = Sammy(function() {
+	
+	
+});

@@ -8,16 +8,17 @@ var tba = {};
 
 	var index = 0,
 		scripts = [
+			'lib/jquery.js',
 			'lib/mote.js',
-			'lib/fugue.js',
+			'lib/sammy.js',
 			'tba.collections.js',
-			'tba.widgets.js'
+			'tba.app.js'
 		],
 		dequeue = function() {
 			
 			var uri = scripts[index];
 			if (!uri) {
-				tba.app.ready();
+				tba.app.run();
 				return;
 			}
 
