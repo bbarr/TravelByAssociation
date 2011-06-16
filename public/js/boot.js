@@ -11,14 +11,16 @@ var tba = {};
 			'lib/jquery.js',
 			'lib/mote.js',
 			'lib/sammy.js',
+			'lib/sammy.haml.js',
+			'lib/sammy.json.js',
 			'tba.collections.js',
-			'tba.app.js'
+			'tba.apps.js'
 		],
 		dequeue = function() {
 			
 			var uri = scripts[index];
 			if (!uri) {
-				tba.app.run();
+				tba.run();
 				return;
 			}
 
