@@ -61,6 +61,10 @@ Mote.Collection.prototype = {
 
 		extend(this, feature);
 
+		if (feature._init) {
+			feature._init();
+		}
+
 		if (Feature.document_initial) {
 			extend(this.Document.initial, Feature.document_initial, true);
 		}			
@@ -319,6 +323,90 @@ Mote.EmbeddedDocuments.document_prototype = {
 	}
 };
 
+
+Mote.Remote = function(col) {
+
+	// use something predefined or try to grab something jquery-ish
+	Mote.Remote.ajax || (Mote.Remote.ajax = ($) ? $.ajax : new Error('Mote.Remote requires an AJAX utitlity);
+}
+
+Mote.Remote.prototype = {
+
+	generate_actions: function(temps) {
+		var name;
+		for (name in temps) this.generate_action(name, temps[name]);
+	},
+
+	generate_action: function(name, temp) {
+
+		var self = this,
+		    action = new Mote.Remote.Action(name, temp);
+
+		action.success = function(data) { self.publish(name + '_success') };
+		action.error = function(data) { self.publisher(name + '_error') };
+
+		this[name] = function() { action.fire(arguments) };
+	}
+	
+}
+
+Mote.Remote.Action = function(name, temp) {
+
+	this.name = name;
+	
+	var parts = temp.split(' ');
+	this.method = parts[0];
+	this.template = parts[1];
+	
+	this.params = /\:(\w+)/g.exec(this.template);
+
+	this.success = function() {};
+	this.error = function() {};
+}
+
+Mote.Remote.Action.prototype = {
+	
+	fire: function(args) {
+
+		var request = this._generate(args)
+
+		Mote.Remote.ajax({
+			url: request.uri,
+			type: request.method,
+			data: request.data,
+			contentType: request.content_type,
+			success: request.success,
+			error: request.error
+		});
+	},
+
+	_generate: function(args) {
+
+		var request = {};
+
+		request.params = [].slice.call(args, 0);
+		request.data = (this.params.length < request.params.length) ? request.params.pop() : {};
+		request.success = this.success;
+		request.error = this.error;
+		
+		this._decorate_uri(request);
+
+		return request;
+	},
+
+	_decorate_uri: function(request) {
+
+		var uri = this.template,
+		    request_params = request.params,
+		    action_params = this.params,
+		    len = action_params.length,
+		    i = 0;
+
+		for (; i < len; i++) uri = uri.replace(action_params[i], request_params[i]);
+		
+		request.uri = uri;
+	}
+}
 
 
 /**
