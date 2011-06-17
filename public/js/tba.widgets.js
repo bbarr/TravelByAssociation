@@ -6,15 +6,11 @@ tba.app = Fugue.create('app', document.body, {
 	current_trip: null,
 	
 	init: function() {
-		
 		var self = this;
-
 		tba.Trips.subscribe('fetch_success', function(data) {
 			tba.current_trip = new tba.Trips.Document(data);
 			self.publish('ready');
 		});
-
-		this.subscribe('ready', this.loaded);
 	},
 	
 	ready: function() {
