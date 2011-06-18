@@ -31,7 +31,10 @@
 		this.widgets = {};
 		this.traits = {};
 
-		if (ext) this.extend(ext);
+		if (ext) {
+			
+			this.extend(ext);
+		}
 		if (this.init) this.init();
 	}
 

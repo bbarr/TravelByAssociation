@@ -327,7 +327,13 @@ Mote.EmbeddedDocuments.document_prototype = {
 Mote.Remote = function(col) {
 
 	// use something predefined or try to grab something jquery-ish
-	Mote.Remote.ajax || (Mote.Remote.ajax = ($) ? $.ajax : new Error('Mote.Remote requires an AJAX utitlity);
+	Mote.Remote.ajax || (Mote.Remote.ajax = ($) ? $.ajax : new Error('Mote.Remote requires an AJAX utitlity'));
+	
+	this.request_config = {
+		base_uri: '',
+		success: function(data) { col.publish(this.name + '_success') },
+		error: function(data) { col.publish(this.name + '_error') }
+	};
 }
 
 Mote.Remote.prototype = {
@@ -340,43 +346,44 @@ Mote.Remote.prototype = {
 	generate_action: function(name, temp) {
 
 		var self = this,
-		    action = new Mote.Remote.Action(name, temp);
-
-		action.success = function(data) { self.publish(name + '_success') };
-		action.error = function(data) { self.publisher(name + '_error') };
-
+		    action = new Mote.Remote.Action(name, temp, this.request_config);
+		
 		this[name] = function() { action.fire(arguments) };
 	}
 	
 }
 
-Mote.Remote.Action = function(name, temp) {
+Mote.Remote.Action = function(name, temp, config) {
 
 	this.name = name;
 	
 	var parts = temp.split(' ');
 	this.method = parts[0];
 	this.template = parts[1];
-	
-	this.params = /\:(\w+)/g.exec(this.template);
 
-	this.success = function() {};
-	this.error = function() {};
+	this.params = this.template.match(/\:\w*/) || [];
+	
+	Mote.Util.extend(this, config);
 }
 
 Mote.Remote.Action.prototype = {
 	
 	fire: function(args) {
 
-		var request = this._generate(args)
+		var request = this._generate(args),
+			self = this;
 
 		Mote.Remote.ajax({
 			url: request.uri,
 			type: request.method,
 			data: request.data,
 			contentType: request.content_type,
-			success: request.success,
-			error: request.error
+			success: function(data) {
+				request.success.call(self, data);
+			},
+			error: function(data) {
+				request.error.call(self, data);
+			}
 		});
 	},
 
@@ -403,120 +410,12 @@ Mote.Remote.Action.prototype = {
 		    i = 0;
 
 		for (; i < len; i++) uri = uri.replace(action_params[i], request_params[i]);
+
+		if (this.base_uri) uri = this.base_uri + uri;
 		
 		request.uri = uri;
 	}
 }
-
-
-/**
- *
- *
- *
- */
-Mote.Remote = function(col) {
-	
-	// use something predefined or try to grab something jquery-ish
-	Mote.Remote.ajax || (Mote.Remote.ajax = ($) ? $.ajax : function() { return true; });
-	this.base_uri = '';
-}
-
-Mote.Remote.prototype = {
-	
-	_append_segments: function(uri, segments) {
-		return uri.concat(segments);
-	},
-
-	_append_query: function(uri, query) {
-		
-		var query_string = '?',
-	 	    key;
-
-		for (key in query) query_string += (key + '=' + query[key].toString() + '&');
-
-		query_string = query_string.substr(0, query_string.length - 1);
-		uri.push(query_string);
-
-		return uri;
-	},
-		
-	generate_uri: function(segments, query) {	
-
-		var uri = [this.base_uri, this.name];
-
-		if (segments) {
-			
-			if (query) {
-				uri = this._append_segments(uri, segments);
-				uri = this._append_query(uri, query);
-			}
-			else {
-				if (segments[0]) uri = this._append_segments(uri, segments);
-				else uri = this._append_query(uri, segments);
-			}
-		}
-
-		return uri.join('/');
-	},
-
-	query: function(query, cb) {
-		this._make_request('query', 'GET', this.generate_uri(query));
-	},
-	
-	fetch: function(_id, cb) {
-		this._make_request('fetch', 'GET', this.generate_uri(_id));
-	},
-	
-	persist: function(doc) {
-		
-		var method,
-		    url,
-		    mongo_id = doc.get_mongo_id();
-
-		if (mongo_id) {
-			method = 'PUT';
-			url = this.generate_uri(mongo_id);
-		}
-		else {
-			method = 'POST';
-			url = this.generate_uri();
-		}
-
-		this._make_request('persist', method, url, doc.to_json());
-	},
-	
-	_make_request: function(action, method, url, data) {
-
-		var self = this,
-			request = {
-				url: url,
-				method: method,				
-				success: function(data) { self.publish(action + '_success', data) },
-				error: function(xhr) { self.publish(action + '_error', xhr) },
-				complete: self.dequeue
-			};
-			
-		if (data) {
-			request.data = data;
-			request.contentType = 'application/json';
-		}
-
-		Mote.Remote.ajax(request);
-	}
-}
-
-Mote.Remote.document_prototype = {
-	
-	persist: function() {
-		if (!this.save()) return false;
-		this.collection.persist(this);
-	},
-	
-	get_mongo_id: function() {
-		if (this.data['_id']) return this.data['_id']['$oid'];
-	}
-}
-
 
 /**
  *

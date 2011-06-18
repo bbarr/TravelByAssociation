@@ -30,7 +30,7 @@ tba.Trips = new Mote.Collection(function() {
 	
 	this.plugin(Mote.EmbeddedDocuments);
 	this.plugin(Mote.Remote, function(remote) {
-		remote.base_uri = '/db'; 
+		remote.request_config.base_uri = '/db';
 	});
 
 	this.name = 'trips';
@@ -43,4 +43,8 @@ tba.Trips = new Mote.Collection(function() {
 	this.embeds_many(tba.Locations);
 	this.embeds_many(tba.Transits);
 	this.embeds_many(tba.Associates);
+	
+	this.generate_actions({
+		fetch: 'GET /trips/:trip_id'
+	});
 });
