@@ -36,39 +36,7 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	},
 	
 	init: function() {
-		this
-			.query('.entry')
-			.bind('dragstart', function(e) {
-				var dt = e.originalEvent.dataTransfer;
-				dt.setData('Text', 'hi');
-				dt.effectAllowed = 'move';
-				console.log('start')
-			})
-			.bind('dragend', function(e) {
-				e.stopPropagation();
-				e.preventDefault();		
-				return false;
-			});
-		
-		this
-			.query('#itinerary')
-			.bind('dragover', function(e) {
-				return false;
-			})
-			.bind('dragenter', function(e) {
-				$(this).css({ border: '1px solid red'})
-				return false;
-			})
-			.bind('dragleave', function(e) {
-				$(this).css({ border: '1px solid #aaa'})				
-				return false;
-			})
-			.bind('drop', function(e) {
-				var dt = e.originalEvent.dataTransfer;
-				$(this).css({ border: '1px solid #aaa'})
-				console.log(dt)
-				return false;
-			});
+	
 	},
 	
 	refresh: function() {

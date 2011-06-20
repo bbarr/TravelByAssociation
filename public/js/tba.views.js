@@ -17,9 +17,10 @@ tba.views = {
 		},
 		
 		entry: function(location) {
+			location || (location = {});
 			var b = $.build;
 			return b('li', { 'class': 'entry' }, [
-				b('h3', location.name),
+				b('h3', location.name || ''),
 				b('label', 'address'),
 				b('input', { name: 'address', type: 'text' })
 			]);

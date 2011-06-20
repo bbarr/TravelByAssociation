@@ -66,7 +66,6 @@ sidebar {
 }
 
 #itinerary {
-	height: 300px;
 	border: 1px solid #888;
 	margin: 0 5px 5px;
 }
@@ -75,18 +74,6 @@ sidebar {
 	margin: 5px;
 	border: 1px solid #aaa;
 	height: 50px;
-}
-
-.entry:hover {
-	cursor: move;
-}
-
-/* Prevent the text contents of draggable elements from being selectable. */
-[draggable] {
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	-webkit-user-select: none;
-	user-select: none;
 }
 
 #flash {
