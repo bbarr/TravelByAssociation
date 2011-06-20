@@ -323,7 +323,6 @@ Mote.EmbeddedDocuments.document_prototype = {
 	}
 };
 
-
 Mote.Remote = function(col) {
 
 	// use something predefined or try to grab something jquery-ish
@@ -331,8 +330,8 @@ Mote.Remote = function(col) {
 	
 	this.request_config = {
 		base_uri: '',
-		success: function(data) { col.publish(this.name + '_success') },
-		error: function(data) { col.publish(this.name + '_error') }
+		success: function(data) { col.publish(this.name + '_success', data) },
+		error: function(data) { col.publish(this.name + '_error', data) }
 	};
 }
 
@@ -349,8 +348,7 @@ Mote.Remote.prototype = {
 		    action = new Mote.Remote.Action(name, temp, this.request_config);
 		
 		this[name] = function() { action.fire(arguments) };
-	}
-	
+	}	
 }
 
 Mote.Remote.Action = function(name, temp, config) {
@@ -378,11 +376,11 @@ Mote.Remote.Action.prototype = {
 			type: request.method,
 			data: request.data,
 			contentType: request.content_type,
-			success: function(data) {
-				request.success.call(self, data);
+			success: function() {
+				request.success.apply(self, arguments);
 			},
-			error: function(data) {
-				request.error.call(self, data);
+			error: function() {
+				request.error.apply(self, arguments);
 			}
 		});
 	},

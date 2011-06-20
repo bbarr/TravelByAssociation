@@ -12,6 +12,8 @@
 
 	var Widget = function(name, query, ext, parent) {
 
+		var events;
+
 		if (!ext) {
 			parent = ext;
 			ext = query;
@@ -32,47 +34,22 @@
 		this.traits = {};
 
 		if (ext) {
-			
+			if (ext.events) {
+				events = ext.events;
+				delete ext.events;
+			}	
 			this.extend(ext);
+			this._extend_events(events);
 		}
+		
 		if (this.init) this.init();
 	}
 
 	Widget.prototype = {
 
 		extend: function(obj) {
-
-			var key,
-				prop,
-				event_key,
-				event_prop,
-				event_type,
-				events;
-
-			for (key in obj) {
-				prop = obj[key];
-				if (key === 'events') {
-					events = prop;
-				}
-				else {
-					this[key] = obj[key];
-				}	
-			}
-			
-			if (events) {
-				for (event_key in events) {
-					event_prop = events[event_key];
-					query = event_key.split(' ');
-					event_type = query.pop();
-					cb = typeof event_prop === 'string' ? this[event_prop] : event_prop;
-					if (query.length > 1) {
-						this.delegate(query.join(''), event_type, cb);
-					} 
-					else {
-						this.subscribe(event_type, cb);
-					}
-				}
-			}
+			var key;
+			for (key in obj) this[key] = obj[key];
 			return this;
 		},
 
@@ -143,7 +120,7 @@
 			return this;
 		},
 
-		subscribe: function(event_string, fn) {
+		subscribe: function(event, fn) {
 
 			if (typeof event === 'function') {
 				fn = event;
@@ -151,7 +128,7 @@
 			}
 
 			var self = this,
-		    	event = this._parse_event_string(event_string), 
+		    	event = this._parse_event_string(event), 
 		    	target = event.target, 
 		    	name = event.name,
 			    formatted_fn,
@@ -203,6 +180,29 @@
 				data.name = segments[0];
 
 				return data;
+			},
+			
+			_extend_events: function(events) {
+
+				var query,
+					key,
+					prop,
+					type,
+					cb;
+
+				for (key in events) {
+					prop = events[key];
+					query = key.split(' ');
+					type = query.pop();
+					cb = typeof prop === 'string' ? this[prop] : prop;
+
+					if (query.length > 0) {
+						this.delegate(query.join(''), type, cb);
+					} 
+					else {
+						this.subscribe(type, cb);
+					}
+				}
 			}
 
 		// END PRIVATE
