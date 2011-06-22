@@ -2,7 +2,11 @@
 Fugue.state_toggler('loading', 'loaded', 'is_loading');
 
 tba.app = Fugue.create('app', document.body, {
-	
+
+	events: {
+		'ready': 'refresh'
+	},	
+
 	init: function() {
 		var self = this;
 		tba.Trips.subscribe('fetch_success', function(data) {
@@ -32,7 +36,7 @@ tba.map = Fugue.create('map', {});
 tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	
 	events: {
-		'app.ready': 'refresh',
+		'ready': 'refresh',
 		'input blur': 'process'
 	},
 	
