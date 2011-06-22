@@ -15,7 +15,6 @@
 		var events;
 
 		if (!ext) {
-			parent = ext;
 			ext = query;
 			query = '#' + name;
 		}
@@ -53,23 +52,23 @@
 			return this;
 		},
 
-		create: function(name, query, block) {
-			return this.widgets[name] = new Widget(name, query, block, this)
+		create: function(name, query, ext) {
+			return this.widgets[name] = new Widget(name, query, ext, this)
 				.extend(this.traits);
 		},
 
 		destroy: function() {
 
-	           var self = this;
+	       	var self = this;
 
 			// remove reference from element
-	           this.$container.removeData('fugue');
+	        this.$container.removeData('fugue');
 
 			// remove all classes
-	           $(this.data).each(function(prop) { self.$container.removeClass(prop) });
+	        $(this.data).each(function(prop) { self.$container.removeClass(prop) });
 
 			// pass destroy command to all children widgets
-	           $(this.widgets).each(function(v) { v.destroy() });
+	        $(this.widgets).each(function(v) { v.destroy() });
 
 			// finally, remove this widget
 			if (this.parent) delete this.parent.widgets(this.name);

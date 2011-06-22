@@ -32,21 +32,88 @@ tba.map = Fugue.create('map', {});
 tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	
 	events: {
-		'app.ready': 'refresh'
+		'app.ready': 'refresh',
+		'input blur': 'process'
 	},
 	
 	init: function() {
-	
+
+		var self = this;
+
+		tba.Locations.subscribe('insert_success', function(loc) {
+			self.form.removeClass('error');
+			self.add(loc);
+		});
+		
+		tba.Locations.subscribe('insert_error', function(loc, col) {
+			self.form.addClass('error');
+			tba.flash.error('There was an error while creating that location... Please try again');
+		});
 	},
 	
-	refresh: function() {
+	process: function(e) {
+
+		var value = e.target.value, 
+
+		if ( value === '' ) {
+			this.form.removeClass('error');
+			return;
+		};
 		
+		new tba.Locations.Document({ address: value })
+			.save();
+	},
+
+	add: function(location) {
+		
+		var html = tba.views.itinerary.location(location);
+		
+		this.form
+			.before(html)
+			.find('input').attr('value', '');
+		
+		this.generate_widget(html);
+	},
+	
+	remove: function(location) {},
+	
+	refresh: function() {
+
 		var trip = tba.current_trip,
 			list = tba.views.itinerary.list(trip.data.locations);
 
-		this.$container.find('#itinerary').html(list);
+		this.query('#itinerary').html(list);
+		this._generate_widgets();
+		this.form = this.$container.find('li').last();
+	},
+	
+	generate_widget: function(html) {
+
+		this.create(html.getAttribute('id'), {
+			
+			init: function() {
+				
+			}
+		});
+	},
+	
+	_generate_widgets: function() {
+		
+		var lis = this.query('#itinerary').find('li').not(':last-child'),
+			self = this;
+			
+		lis.each(function(i, li) {
+			self.generate_widget(li);
+		});
 	}
 });
+
+tba.itinerary._location_config = {
+	
+	init: function() {
+		console.log('hi');
+	}
+}
 
 tba.flash = Fugue.create('flash', {
 	
@@ -66,7 +133,7 @@ tba.flash = Fugue.create('flash', {
 	error: function(msg) {
 		this.deliver('error', msg);
 	},
-	
+
 	deliver: function(type, msg) {
 
 		var query = '.' + type;

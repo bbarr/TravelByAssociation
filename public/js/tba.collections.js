@@ -6,6 +6,7 @@ tba.Associates = new Mote.Collection(function() {
 });
 
 tba.Locations = new Mote.Collection(function() {
+	
 	this.name = 'locations';
 	this.keys = [
 		'address',
@@ -14,6 +15,25 @@ tba.Locations = new Mote.Collection(function() {
 		'start_date',
 		'end_date'
 	];
+	
+	this.validate = function(loc) {
+		
+		var pass = true;
+		
+		if (!loc.data.address) {
+			pass = false;
+			this.errors['address'] = 'Requires Address';
+		}
+		
+		return pass;
+	},
+	
+	this.geocode = function() {
+		var self = this;
+		setTimeout(function() {
+			self.publish('geocode_success', [ 70, 70 ]);
+		}, 2000);
+	}
 });
 
 tba.Transits = new Mote.Collection(function() {

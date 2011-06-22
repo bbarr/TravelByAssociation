@@ -65,15 +65,26 @@ sidebar {
 	height: 368px;
 }
 
-#itinerary {
-	border: 1px solid #888;
-	margin: 0 5px 5px;
+.location {
+	margin: 5px;
+	padding: 10px;
+	border: 1px solid #aaa;
 }
 
-.entry {
-	margin: 5px;
-	border: 1px solid #aaa;
-	height: 50px;
+.error input {
+	border: 1px solid red !important;
+	color: red;
+}
+
+.location h3 {
+
+}
+
+.location input {
+	margin-top: 10px;
+	border: 1px solid #222;
+	padding: 5px;
+	width: 156px;
 }
 
 #flash {

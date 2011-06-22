@@ -23,6 +23,8 @@ Mote.Collection = function(block) {
 	self.name = '';
 	self.keys = [];
 
+	self.errors = {};
+
 	Mote.Util.extend(self, new Mote.Publisher);
 	Mote.Util.extend(self, Mote.Collection.prototype);
 
@@ -248,7 +250,7 @@ Mote.Publisher.prototype = {
 			len = subs.length,
 			i = 0;
 
-		for (; i < len; i++) subs[i](data);
+		for (; i < len; i++) subs[i](data, this);
 	}
 }
 
