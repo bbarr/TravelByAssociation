@@ -27,7 +27,7 @@
 		this.$container.data('fugue', this);
 		this.subscriptions = { '*': [] };
 		this.elements = {};
-		this.data = {};
+		this.states = {};
 
 		this.widgets = {};
 		this.traits = {};
@@ -65,7 +65,7 @@
 	        this.$container.removeData('fugue');
 
 			// remove all classes
-	        $(this.data).each(function(prop) { self.$container.removeClass(prop) });
+	        $(this.states).each(function(prop) { self.$container.removeClass(prop) });
 
 			// pass destroy command to all children widgets
 	        $(this.widgets).each(function(v) { v.destroy() });
@@ -75,10 +75,12 @@
 		},
 
 		state_toggler: function(on, off, prop) {
-
+			
+			prop || (prop = on);
+			
 			this.traits[on] = this[on] = function() {
 
-			    this.data[prop] = true;
+				this.states[prop] = true;
 				this.$container.addClass(prop);
 
 				return this;
@@ -86,7 +88,7 @@
 
 			this.traits[off] = this[off] = function() {
 
-	               this.data[prop] = false;
+		       		this.states[prop] = false;
 				this.$container.removeClass(prop);
 
 				return this;

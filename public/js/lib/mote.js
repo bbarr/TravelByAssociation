@@ -234,13 +234,15 @@ Mote.Publisher = function() {
 
 Mote.Publisher.prototype = {
 	
-	subscribe: function(topic, fn) {
+	subscribe: function(topic, fn, scope) {
 		
 		if (typeof topic === 'function') {
+			scope = fn;
 			fn = topic;
 			topic = '*';
 		}
-		
+
+		fn.scope = scope || this;
 		(this.subscriptions[topic] || (this.subscriptions[topic] = [])).push(fn);
 	},
 	
@@ -250,7 +252,7 @@ Mote.Publisher.prototype = {
 			len = subs.length,
 			i = 0;
 
-		for (; i < len; i++) subs[i](data, this);
+		for (; i < len; i++) subs[i].call(this, data, this);
 	}
 }
 
