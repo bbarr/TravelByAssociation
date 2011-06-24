@@ -8,10 +8,10 @@ tba.app = Fugue.create('app', document.body, {
 	},
 
 	init: function() {
-		tba.Trips.subscribe('fetch_success', this.handle_fetched, this);
+		tba.Trips.subscribe('fetch_success', this.set_current_trip, this);
 	},
 	
-	handled_fetched: function(data) {
+	set_current_trip: function(data) {
 		tba.current_trip = new tba.Trips.Document(data);
 		this.publish('ready');
 	},
@@ -38,13 +38,11 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	
 	events: {
 		'ready': 'refresh',
-		'input blur': 'process'
+		'input blur': 'create_location'
 	},
 	
 	init: function() {
 		
-		
-
 		tba.Locations.subscribe('insert_success', function(loc) {
 			self.form.removeClass('error');
 			self.add(loc);
@@ -56,7 +54,7 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 		});
 	},
 	
-	process: function(e) {
+	create_location: function(e) {
 
 		var value = e.target.value, 
 
