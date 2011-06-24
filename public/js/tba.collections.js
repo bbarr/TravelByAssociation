@@ -52,7 +52,8 @@ tba.Trips = new Mote.Collection(function() {
 	this.plugin(Mote.Remote, function(remote) {
 		remote.request_config.base_uri = '/db';
 	});
-
+	
+	this.cap_size = 1;
 	this.name = 'trips';
 	this.keys = [
 		'name',
@@ -66,5 +67,10 @@ tba.Trips = new Mote.Collection(function() {
 	
 	this.generate_actions({
 		fetch: 'GET /trips/:trip_id'
+	});
+
+	this.subscribe('fetch_success', function(data) {
+		var doc = new this.Document(data);
+		this.insert(doc);
 	});
 });

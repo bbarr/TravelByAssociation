@@ -28,7 +28,7 @@ Mote.Collection = function(block) {
 	Mote.Util.extend(self, new Mote.Publisher);
 	Mote.Util.extend(self, Mote.Collection.prototype);
 
-	self.length = 0;
+	self.cap_size = 0;
 	self.documents = [];
 	self.Document = function(data) {
 
@@ -133,16 +133,27 @@ Mote.Collection.prototype = {
 	},
 
 	insert: function(doc) {
+
+		var docs = this.documents;		
+
 		if (!this.validate(doc)) return false;
 		if (doc._mote_id) return false;
+		if (this.cap_size && docs.length === this.cap_size) docs.shift();	
+
 		doc._mote_id = this._generate_mote_id();
-		this.documents.push(doc.clone());
+		docs.push(doc.clone());
+
 		return doc;
 	},
 
 	update: function(doc) {
+
+		var index;
+
+		if (!this.validate(doc)) return false;
 		if (!doc._mote_id) return false;
-		var index = this.index_of(doc);
+
+		index = this.index_of(doc);
 		if (index > -1) {
 			this.documents.splice(index, 1, doc.clone());
 			return doc;

@@ -1,4 +1,3 @@
-
 Fugue.state_toggler('loading', 'loaded');
 
 tba.app = Fugue.create('app', document.body, {
@@ -8,26 +7,20 @@ tba.app = Fugue.create('app', document.body, {
 	},
 
 	init: function() {
-		tba.Trips.subscribe('fetch_success', this.set_current_trip, this);
+		tba.Trips.subscribe('insert_success', this.update_current_trip, this);
 	},
 	
-	set_current_trip: function(data) {
-		tba.current_trip = new tba.Trips.Document(data);
+	update_current_trip: function() {
+		tba.current_trip = tba.Trips.documents[0];
 		this.publish('ready');
 	},
 	
 	refresh: function() {
-		
+
 		var hash = window.location.hash,
-			id;
-			
-		if (hash) id = hash.substr(1);
-		
-		if (id) tba.Trips.fetch(id);
-		else {
-			tba.current_trip = new tba.Trips.Document;
-			this.publish('ready');
-		}
+		    id = (hash) ? hash.substr(1) : false;
+
+		(id) ? tba.Trips.fetch(id) : new tba.Trips.Document().save();
 	}
 	
 });
@@ -37,21 +30,13 @@ tba.map = Fugue.create('map', {});
 tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	
 	events: {
-		'ready': 'refresh',
+		'app.ready': 'refresh',
 		'input blur': 'create_location'
 	},
 	
 	init: function() {
-		
-		tba.Locations.subscribe('insert_success', function(loc) {
-			self.form.removeClass('error');
-			self.add(loc);
-		});
-		
-		tba.Locations.subscribe('insert_error', function(loc, col) {
-			self.form.addClass('error');
-			tba.flash.error('There was an error while creating that location... Please try again');
-		});
+		tba.Locations.subscribe('save_success', this.add, this);
+		tba.Locations.subscribe('save_error', this.error, this);
 	},
 	
 	create_location: function(e) {
@@ -63,8 +48,12 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 			return;
 		};
 		
-		new tba.Locations.Document({ address: value })
-			.save();
+		new tba.Locations.Document({ address: value }).save();
+	},
+
+	error: function(loc, col) {
+		self.form.addClass('error');
+		tba.flash.error('There was an error while creating that location... Please try again');
 	},
 
 	add: function(location) {
@@ -73,9 +62,8 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 		
 		this.form
 			.before(html)
-			.find('input').attr('value', '');
-		
-		this.generate_widget(html);
+			.find('input').attr('value', '')
+			.removeClass('error');
 	},
 	
 	remove: function(location) {},
@@ -86,37 +74,9 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 			list = tba.views.itinerary.list(trip.data.locations);
 
 		this.query('#itinerary').html(list);
-		this._generate_widgets();
 		this.form = this.$container.find('li').last();
-	},
-	
-	generate_widget: function(html) {
-
-		this.create(html.getAttribute('id'), {
-			
-			init: function() {
-				
-			}
-		});
-	},
-	
-	_generate_widgets: function() {
-		
-		var lis = this.query('#itinerary').find('li').not(':last-child'),
-			self = this;
-			
-		lis.each(function(i, li) {
-			self.generate_widget(li);
-		});
 	}
 });
-
-tba.itinerary._location_config = {
-	
-	init: function() {
-		console.log('hi');
-	}
-}
 
 tba.flash = Fugue.create('flash', {
 	
