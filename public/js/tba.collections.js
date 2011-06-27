@@ -16,24 +16,33 @@ tba.Locations = new Mote.Collection(function() {
 		'end_date'
 	];
 	
-	this.validate = function(loc) {
+	this.validate = function(doc) {
 		
 		var pass = true;
 		
-		if (!loc.data.address) {
+		if (!doc.data.address) {
 			pass = false;
 			this.errors['address'] = 'Requires Address';
 		}
 		
 		return pass;
 	},
-	
-	this.geocode = function() {
-		var self = this;
-		setTimeout(function() {
-			self.publish('geocode_success', [ 70, 70 ]);
-		}, 2000);
-	}
+
+	this.geocode = function(address) {
+		
+	},
+
+	this.subscribe('before_save', function(doc) {
+
+		if (doc.data.lat && doc.data.lng) return;		
+
+		this.waiting = true;
+		this.subscribe('geocoded', function(loc) {
+			
+		});
+		
+		this.geocode(doc.data.address);
+	});
 });
 
 tba.Transits = new Mote.Collection(function() {
@@ -50,7 +59,7 @@ tba.Trips = new Mote.Collection(function() {
 	
 	this.plugin(Mote.EmbeddedDocuments);
 	this.plugin(Mote.Remote, function(remote) {
-		remote.request_config.base_uri = '/db';
+		remote.action_config.base_uri = '/db';
 	});
 	
 	this.cap_size = 1;

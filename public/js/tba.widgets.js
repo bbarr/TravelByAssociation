@@ -7,20 +7,22 @@ tba.app = Fugue.create('app', document.body, {
 	},
 
 	init: function() {
-		tba.Trips.subscribe('insert_success', this.update_current_trip, this);
-	},
-	
-	update_current_trip: function() {
-		tba.current_trip = tba.Trips.documents[0];
-		this.publish('ready');
+		tba.Trips.subscribe('change.insert', function(data) {
+			tba.current_trip = tba.Trips.documents[0];
+			this.publish('ready');
+		}, this);
 	},
 	
 	refresh: function() {
 
 		var hash = window.location.hash,
 		    id = (hash) ? hash.substr(1) : false;
-
-		(id) ? tba.Trips.fetch(id) : new tba.Trips.Document().save();
+		
+		if (id) tba.Trips.fetch(id);
+		else {
+			new tba.Trips.Document().save();
+			tba.flash.notice('Welcome to Travel By Association!');
+		}
 	}
 	
 });
@@ -35,25 +37,21 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	},
 	
 	init: function() {
-		tba.Locations.subscribe('save_success', this.add, this);
-		tba.Locations.subscribe('save_error', this.error, this);
+		tba.Locations.subscribe('change.insert', this.add, this);
+		tba.Locations.subscribe('error.insert', this.error, this);
 	},
 	
 	create_location: function(e) {
 
 		var value = e.target.value, 
-
-		if ( value === '' ) {
-			this.form.removeClass('error');
-			return;
-		};
+		if ( value === '' ) return;
 		
+		this.form.removeClass('error');
 		new tba.Locations.Document({ address: value }).save();
 	},
 
-	error: function(loc, col) {
-		self.form.addClass('error');
-		tba.flash.error('There was an error while creating that location... Please try again');
+	error: function(errors) {
+		this.form.addClass('error');
 	},
 
 	add: function(location) {
@@ -83,9 +81,6 @@ tba.flash = Fugue.create('flash', {
 	events: {
 		'li click': function(e) {
 			$(e.currentTarget).addClass('hide');
-		},
-		'app.ready': function(e) {
-			this.notice('Welcome to Travel By Association! Plan your trip and get advice from people who probably care about you somehow.');
 		}
 	},
 

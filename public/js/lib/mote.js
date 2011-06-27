@@ -63,8 +63,8 @@ Mote.Collection.prototype = {
 
 		extend(this, feature);
 
-		if (feature._init) {
-			feature._init();
+		if (feature.init) {
+			feature.init();
 		}
 
 		if (Feature.document_initial) {
@@ -136,13 +136,16 @@ Mote.Collection.prototype = {
 
 		var docs = this.documents;		
 
-		if (!this.validate(doc)) return false;
+		if (!this.validate(doc)) {
+			this.publish('error.insert', this.errors);
+			return false;
+		}
 		if (doc._mote_id) return false;
-		if (this.cap_size && docs.length === this.cap_size) docs.shift();	
+		if (this.cap_size && docs.length === this.cap_size) this.remove(docs[0]);
 
 		doc._mote_id = this._generate_mote_id();
 		docs.push(doc.clone());
-
+		this.publish('change.insert', doc);
 		return doc;
 	},
 
@@ -150,12 +153,17 @@ Mote.Collection.prototype = {
 
 		var index;
 
-		if (!this.validate(doc)) return false;
+		if (!this.validate(doc)) {
+			this.publish('error.update', this.errors);
+			return false;
+		}
+
 		if (!doc._mote_id) return false;
 
 		index = this.index_of(doc);
 		if (index > -1) {
 			this.documents.splice(index, 1, doc.clone());
+			this.publish('change.update', doc);
 			return doc;
 		}
 		else return false
@@ -166,6 +174,7 @@ Mote.Collection.prototype = {
 		var index = this.index_of(doc);
 		if (index > -1) {
 			this.documents.splice(index, 1);
+			this.publish('change.remove');
 			return this.documents.length;
 		}
 		else return false;
@@ -203,7 +212,25 @@ Mote.Collection.prototype = {
 Mote.Document = {
 
 	save: function() {
-		return this.collection[this._mote_id ? 'update' : 'insert'](this);
+
+		this.publish('before_save');
+		if (this.waiting) return;
+
+		var saved = this[this._mote_id ? 'update' : 'insert']();
+		saved ? this.publish('change.save', this) : this.publish('error.save', this.collection.errors);
+		return saved;
+	},
+
+	insert: function() {
+		var inserted = this.collection.insert(this);
+		inserted ? this.publish('change.insert', this) : this.publish('error.insert', this.collection.errors);
+		return saved;
+	},
+
+	update: function() {
+		var updated = this.collection.update(this);
+		updated ? this.publish('change.update', this) : this.publish('error.update', this.collection.errors);
+		return updated;
 	},
 
 	collapse: function() {
@@ -244,7 +271,7 @@ Mote.Publisher = function() {
 }
 
 Mote.Publisher.prototype = {
-	
+
 	subscribe: function(topic, fn, scope) {
 		
 		if (typeof topic === 'function') {
@@ -260,8 +287,11 @@ Mote.Publisher.prototype = {
 	publish: function(topic, data) {
 
 		var subs = (this.subscriptions[topic] || []).concat(this.subscriptions['*']),
-			len = subs.length,
-			i = 0;
+		    nss = subs.split('.'),
+		    len = subs.length,
+	            i = 0;
+
+		while (nss[0]) subs.concat(this.subscriptions[nss.shift()] || []);
 
 		for (; i < len; i++) subs[i].call(this, data, this);
 	}
@@ -343,10 +373,10 @@ Mote.Remote = function(col) {
 	// use something predefined or try to grab something jquery-ish
 	Mote.Remote.ajax || (Mote.Remote.ajax = ($) ? $.ajax : new Error('Mote.Remote requires an AJAX utitlity'));
 	
-	this.request_config = {
+	this.action_config = {
 		base_uri: '',
-		success: function(data) { col.publish(this.name + '_success', data) },
-		error: function(data) { col.publish(this.name + '_error', data) }
+		success: function(data) { col.publish('remote.success.' + this.name, data) },
+		error: function(data) { col.publish('remote.error.' + this.name, data) }
 	};
 }
 
@@ -360,7 +390,7 @@ Mote.Remote.prototype = {
 	generate_action: function(name, temp) {
 
 		var self = this,
-		    action = new Mote.Remote.Action(name, temp, this.request_config);
+		    action = new Mote.Remote.Action(name, temp, this.action_config);
 		
 		this[name] = function() { action.fire(arguments) };
 	}	
