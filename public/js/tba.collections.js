@@ -29,20 +29,11 @@ tba.Locations = new Mote.Collection(function() {
 	},
 
 	this.geocode = function(address) {
-		
-	},
-
-	this.subscribe('before_save', function(doc) {
-
-		if (doc.data.lat && doc.data.lng) return;		
-
-		this.waiting = true;
-		this.subscribe('geocoded', function(loc) {
-			
-		});
-		
-		this.geocode(doc.data.address);
-	});
+		var self = this;
+		setTimeout(function() {
+			self.publish('geocoded', [70, 70]);
+		}, 1000);
+	}
 });
 
 tba.Transits = new Mote.Collection(function() {

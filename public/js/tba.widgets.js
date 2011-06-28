@@ -27,7 +27,9 @@ tba.app = Fugue.create('app', document.body, {
 	
 });
 
-tba.map = Fugue.create('map', {});
+tba.map = Fugue.create('map', {
+	
+});
 
 tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	
@@ -43,11 +45,20 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	
 	create_location: function(e) {
 
-		var value = e.target.value, 
+		var value = e.target.value; 
 		if ( value === '' ) return;
 		
 		this.form.removeClass('error');
-		new tba.Locations.Document({ address: value }).save();
+
+		tba.Locations.geocode(value);
+		
+		tba.Locations.subscribe('geocoded', function(pos) {
+			new tba.Locations.Document({ 
+				address: value,
+				lat: pos[0],
+				lng: pos[1]
+			}).save();
+		});
 	},
 
 	error: function(errors) {
@@ -70,7 +81,7 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 
 		var trip = tba.current_trip,
 			list = tba.views.itinerary.list(trip.data.locations);
-
+			
 		this.query('#itinerary').html(list);
 		this.form = this.$container.find('li').last();
 	}

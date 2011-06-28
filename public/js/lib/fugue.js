@@ -185,18 +185,14 @@
 			
 			_extend_events: function(events) {
 
-				var query,
-					key,
-					prop,
-					type,
-					cb;
+				var query, key, prop, type, cb;
 
 				for (key in events) {
 					prop = events[key];
 					query = key.split(' ');
 					type = query.pop();
 					cb = typeof prop === 'string' ? this[prop] : prop;
-
+					
 					if (query.length > 0) {
 						this.delegate(query.join(''), type, cb);
 					} 

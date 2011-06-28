@@ -212,10 +212,6 @@ Mote.Collection.prototype = {
 Mote.Document = {
 
 	save: function() {
-
-		this.publish('before_save');
-		if (this.waiting) return;
-
 		var saved = this[this._mote_id ? 'update' : 'insert']();
 		saved ? this.publish('change.save', this) : this.publish('error.save', this.collection.errors);
 		return saved;
@@ -224,7 +220,7 @@ Mote.Document = {
 	insert: function() {
 		var inserted = this.collection.insert(this);
 		inserted ? this.publish('change.insert', this) : this.publish('error.insert', this.collection.errors);
-		return saved;
+		return inserted;
 	},
 
 	update: function() {
@@ -287,13 +283,13 @@ Mote.Publisher.prototype = {
 	publish: function(topic, data) {
 
 		var subs = (this.subscriptions[topic] || []).concat(this.subscriptions['*']),
-		    nss = subs.split('.'),
+		    nss = topic.split('.'),
 		    len = subs.length,
-	            i = 0;
+	        i = 0;
 
 		while (nss[0]) subs.concat(this.subscriptions[nss.shift()] || []);
 
-		for (; i < len; i++) subs[i].call(this, data, this);
+		for (; i < len; i++) subs[i].call(subs[i].scope || this, data, this);
 	}
 }
 
