@@ -24,11 +24,13 @@ tba.app = Fugue.create('app', document.body, {
 	
 });
 
-tba.overlay_prototype = {
+tba.overlays = Fugue.create('overlays', 'body', {});
+
+tba.overlays.traits = {
 	events: {
-		'p click': function() {}
+		'p click': function() { alert('hi!') }
 	}
-};
+}
 
 tba.map = Fugue.create('map', {
 	
@@ -143,7 +145,7 @@ tba.map = Fugue.create('map', {
 		var overlay_id = 'location-overlay-' + location._mote_id,
 			overlay_content = document.body.appendChild(tba.views.map.overlay(overlay_id)),
 			info_window = new google.maps.InfoWindow({ content: overlay_content }),
-			widget = Fugue.create(overlay_id, tba.overlay_prototype);
+			widget = tba.overlays.create(overlay_id);
 		
 		widget.info_window = info_window;
 		

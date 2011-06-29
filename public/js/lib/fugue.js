@@ -48,7 +48,10 @@
 
 		extend: function(obj) {
 			var key;
-			for (key in obj) this[key] = obj[key];
+			for (key in obj) {
+				if (obj.events) this._extend_events(obj.events);
+				else this[key] = obj[key];
+			}
 			return this;
 		},
 
