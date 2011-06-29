@@ -38,21 +38,39 @@ li {
 }
 
 header {
-	margin-bottom: 20px;
+	margin-bottom: 10px;
 	overflow: hidden;
 }
 
 header nav {
 	float: right;
+	margin-top: 10px;
 }
 
 header nav li {
 	float: left;
+	font-size: 12px;
+	margin-right: 10px;
+	padding-right: 10px;
+	border-right: 1px solid #000;
+}
+
+header nav li:last-child {
+	margin-right: 0;
+	padding-right: 0;
+	border-right: none;
+}
+
+header nav a {
+	text-decoration: none;
+	color: #000;
 }
 
 header h1 {
 	width: 200px;
 	margin: 0;
+	border: 1px solid #fff;
+	margin-right: 20px;
 	border-top: none;
 	float: left;
 }
@@ -62,13 +80,25 @@ sidebar {
 	width: 200px;
 	border: 1px solid #000;
 	margin: 0 20px 0 0;
-	height: 368px;
+	height: 500px;
 }
 
 .location {
 	margin: 5px;
 	padding: 10px;
 	border: 1px solid #aaa;
+	position: relative;
+}
+
+.location .delete {
+	position: absolute;
+	top: 0;
+	right: 0;
+	color: #fff;
+	background: #f00;
+	padding: 2px 5px;
+	text-decoration: none;
+	font-size: 12px;
 }
 
 .error input {
@@ -93,7 +123,7 @@ sidebar {
 }
 
 #flash li {
-	padding: 10px;
+	padding: 5px 10px;
 	margin: 0 0 5px;
 }
 
@@ -131,7 +161,7 @@ sidebar {
 
 #map {
 	border: 1px solid #aaa;
-	height: 400px;
+	height: 500px;
 	margin: 0;
 	overflow: hidden;
 }

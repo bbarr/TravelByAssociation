@@ -23,9 +23,10 @@ tba.views = {
 		
 		location: function(location) {
 			var b = $.build;
-			return b('li', { 'class': 'location', id: 'location-' + location._mote_id }, [
-				b('h3', location.data.address)
-			]);
+			return b('li', { 'class': 'location', 'id': 'location-' + location._mote_id }, [
+					b('a', { href: '#', 'class': 'delete' }, 'X'),
+					b('h3', location.data.address)
+				]);
 		},
 		
 		location_input: function() {
@@ -34,6 +35,14 @@ tba.views = {
 				b('h3', 'Add Location'),
 				b('input', { name: 'address', type: 'text', placeholder: 'Address' })
 			]);
+		}
+	},
+	
+	map: {
+		
+		overlay: function(id) {
+			var b = $.build;
+			return b('div', { id: id }, b('p', 'an overlay!'));
 		}
 	}
 }

@@ -26,13 +26,6 @@ tba.Locations = new Mote.Collection(function() {
 		}
 		
 		return pass;
-	},
-
-	this.geocode = function(address) {
-		var self = this;
-		setTimeout(function() {
-			self.publish('geocoded', [70, 70]);
-		}, 1000);
 	}
 });
 

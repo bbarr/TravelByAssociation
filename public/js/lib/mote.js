@@ -90,7 +90,7 @@ Mote.Collection.prototype = {
 			match = true;			
 			
 			for (key in queries) {
-				if (queries[key] === '*' || doc.data[key] != queries[key]) {
+				if (queries[key] !== '*' && doc.data[key] != queries[key] && doc[key] != queries[key]) {
 					match = false;
 					break;
 				}
@@ -170,11 +170,17 @@ Mote.Collection.prototype = {
 	},
 
 	remove: function(doc) {
-		if (doc._mote_id) return false;
+
+		if (typeof doc === 'string') {
+			doc = this.find_one({ _mote_id: doc });
+		}
+
+		if (!doc._mote_id) return false;
+
 		var index = this.index_of(doc);
 		if (index > -1) {
-			this.documents.splice(index, 1);
-			this.publish('change.remove');
+			var removed = this.documents.splice(index, 1);
+			this.publish('change.remove', removed[0]);
 			return this.documents.length;
 		}
 		else return false;
