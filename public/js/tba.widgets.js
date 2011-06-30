@@ -24,24 +24,25 @@ tba.app = Fugue.create('app', document.body, {
 	
 });
 
-tba.overlays = Fugue.create('overlays', 'body', {});
-
-tba.overlays.traits = {
+tba.overlay_config = {
 	events: {
-		'p click': function() { alert('hi!') }
+		'p click': function() {  }
 	}
 }
 
 tba.map = Fugue.create('map', {
 	
-	events: {},
+	events: {
+		'app.ready': 'refresh'
+	},
 	
 	_markers: [],
+	_overlays: [],
 	_poly: null,
 	_map: null,
 	
 	_map_config: {
-		zoom: 4,
+		zoom: 5,
 		center: new google.maps.LatLng(40.77, -73.98), // new york, cause why not
 		mapTypeId: google.maps.MapTypeId.ROADMAP
 	},
@@ -49,12 +50,11 @@ tba.map = Fugue.create('map', {
 	init: function() {
 		var self = this;
 		this._map = new google.maps.Map(this.$container[0], this._map_config);
-		tba.Locations.subscribe('change.remove', this.remove, this);
-		tba.Locations.subscribe('change.insert', this.add, this);
-		google.maps.event.addListener(this._map, 'zoom_changed', function() {
-			if (self._map.zoom > 15) self._map.setZoom(15);
-		});
-		
+	},
+	
+	refresh: function() {
+		tba.current_trip.data.locations.subscribe('change.remove', this.remove, this);
+		tba.current_trip.data.locations.subscribe('change.insert', this.add, this);
 	},
 	
 	remove: function(location) {
@@ -68,11 +68,13 @@ tba.map = Fugue.create('map', {
 			if (marker.position.lat() === location.data.lat && marker.position.lng() === location.data.lng) {
 				removed = this._markers.splice(i, 1);
 				removed[0].setMap(null);
+				removed = this._overlays.splice(i, 1);
+				removed[0].destroy();
 				break;
 			}
 		}
 		
-		this.refocus();
+		this.focus_reset();
 	},
 	
 	geocode: function(address, cb) {
@@ -83,10 +85,18 @@ tba.map = Fugue.create('map', {
 	add: function(location) {
 		var marker = this._generate_marker(location);
 		this._generate_overlay(location, marker);
-		this.refocus();
+		this.focus_reset();
 	},
 	
-	refocus: function() {
+	focus: function(location_id) {
+		var location = tba.current_trip.data.locations.find_one({'_mote_id' : location_id }),
+			latlng = new google.maps.LatLng(location.data.lat, location.data.lng);
+		
+		this._map.setCenter(latlng);
+		this._map.setZoom(15);
+	},
+	
+	focus_reset: function() {
 
 		var markers = this._markers,
 			len = markers.length,
@@ -104,7 +114,12 @@ tba.map = Fugue.create('map', {
 			this._map.setCenter(this._map_config.center);
 			this._map.setZoom(this._map_config.zoom);
 		}
-		else this._map.fitBounds(bounds);
+		else {
+			this._map.fitBounds(bounds);
+			if (this._map.getZoom() > 15) {
+				this._map.setZoom(15);
+			}
+		}
 		
 		this.redraw_poly(locs);
 	},
@@ -145,9 +160,10 @@ tba.map = Fugue.create('map', {
 		var overlay_id = 'location-overlay-' + location._mote_id,
 			overlay_content = document.body.appendChild(tba.views.map.overlay(overlay_id)),
 			info_window = new google.maps.InfoWindow({ content: overlay_content }),
-			widget = tba.overlays.create(overlay_id);
+			widget = Fugue.create(overlay_id, tba.overlay_config);
 		
 		widget.info_window = info_window;
+		this._overlays.push(widget);
 		
 		google.maps.event.addListener(marker, 'click', function() {
 			info_window.open(marker.getMap(), marker);
@@ -167,15 +183,20 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 
 			e.preventDefault();
 
-			tba.Locations.remove(_mote_id);
+			tba.current_trip.data.locations.remove(_mote_id);
+		},
+		'a.focus click': function(e) {
+			
+			var $el = $(e.currentTarget).parent('li'),
+				_mote_id = $el.attr('id').split('-')[1];
+
+			e.preventDefault();
+
+			tba.map.focus(_mote_id);
 		}
 	},
 	
-	init: function() {
-		tba.Locations.subscribe('change.insert', this.add, this);
-		tba.Locations.subscribe('error.insert', this.error, this);
-		tba.Locations.subscribe('change.remove', this.remove, this);
-	},
+	init: function() {},
 	
 	create_location: function(e) {
 
@@ -189,11 +210,11 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 			var result = results[0],
 				loc = result.geometry.location;
 				
-			new tba.Locations.Document({ 
+			tba.current_trip.embed(new tba.current_trip.data.locations.Document({ 
 				address: result.formatted_address,
 				lat: loc.lat(),
 				lng: loc.lng()
-			}).save();
+			}));
 			
 		});
 		
@@ -224,5 +245,9 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 			
 		this.query('#itinerary').html(list);
 		this.form = this.$container.find('li').last();
+		
+		tba.current_trip.data.locations.subscribe('change.insert', this.add, this);
+		tba.current_trip.data.locations.subscribe('error.insert', this.error, this);
+		tba.current_trip.data.locations.subscribe('change.remove', this.remove, this);
 	}
 });

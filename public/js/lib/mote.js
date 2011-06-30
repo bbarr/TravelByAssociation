@@ -362,7 +362,7 @@ Mote.EmbeddedDocuments.document_prototype = {
 		for (; i < len; i++) {
 			key = keys[i];
 			if (key === col_name || key === doc_name) {
-			    return doc.save();
+			    return this.data[key].insert(doc);
 			}
 		}
 		

@@ -70,11 +70,8 @@
 			// remove all classes
 	        $(this.states).each(function(prop) { self.$container.removeClass(prop) });
 
-			// pass destroy command to all children widgets
-	        $(this.widgets).each(function(v) { v.destroy() });
-
 			// finally, remove this widget
-			if (this.parent) delete this.parent.widgets(this.name);
+			if (this.parent) delete this.parent.widgets[this.name];
 		},
 
 		state_toggler: function(on, off, prop) {

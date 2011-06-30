@@ -101,6 +101,18 @@ sidebar {
 	font-size: 12px;
 }
 
+.location .focus {
+   	border: 1px solid #000000;
+    border-radius: 10px 10px 10px 10px;
+    font-size: 28px;
+    line-height: 16px;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    text-decoration: none;
+    top: 20px;
+}
+
 .error input {
 	border: 1px solid red !important;
 	color: red;
@@ -155,15 +167,28 @@ sidebar {
 	display: inline;
 }
 
-#content {
-
-}
-
 #map {
 	border: 1px solid #aaa;
 	height: 500px;
 	margin: 0;
 	overflow: hidden;
+}
+
+.location-overlay {
+	width: 500px;
+	height: 400px;
+}
+
+.location-overlay .needs {
+	float: left;
+	border-right: 1px solid #aaa;
+	margin: 0 10px 0 0;
+	height: 310px;
+	width: 180px;
+}
+
+.location-overlay .solutions {
+	height: 310px;
 }
 
 footer {
