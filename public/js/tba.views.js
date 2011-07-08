@@ -26,7 +26,7 @@ tba.views = {
 			return b('li', { 'class': 'location', 'id': 'location-' + location._mote_id }, [
 					b('a', { href: '#', 'class': 'delete' }, 'X'),
 					b('a', { href: '#', 'class': 'focus' }, '+'),
-					b('h3', location.data.address)
+					b('h3', location.address)
 				]);
 		},
 		
@@ -43,9 +43,9 @@ tba.views = {
 		
 		overlay: function(id) {
 			var b = $.build;
-			return b('div', { id: 'location-overlay-' + id, 'class': 'location-overlay' }, [
+			return b('div', { id: id, 'class': 'location-overlay' }, [
 				tba.views.map.needs,
-				tba.views.map.solutions
+				b('div', { 'id': 'solutions' })
 			]);
 		},
 		
@@ -59,9 +59,19 @@ tba.views = {
 			]);
 		},
 		
-		solutions: function() {
+		need: function(need) {
 			var b = $.build;
-			return b('div', { 'class': 'solutions' })
+			return b('li', { id: 'need-' + need._mote_id }, need.need);
+		},
+		
+		solutions: function(need) {
+			var b = $.build;
+			return b('div', { 'id': 'solutions-' + need._mote_id }, [
+				b('h3', 'Solutions'),
+				b('ul', [
+					b('li', b('input', { 'type': 'text' } ))
+				])
+			]);
 		}
 	}
 }

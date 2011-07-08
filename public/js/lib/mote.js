@@ -1,10 +1,5 @@
 /**
  *  MoteJS is MongoDB-style javascript storage.
- *  
- *  - Documents are represented by simple javascript Objects.
- *  - Collections manage these "documents" and help keep the store in synch.
- *  - Extend functionality with custom plugins
- *  - (Optional) RESTful persistance based on MongoLab's API.
  *
  *  @author Brendan Barr brendanbarr.web@gmail.com
  */
@@ -35,14 +30,13 @@ Mote.Collection = function(block) {
 		var extend = Mote.Util.extend;
 
 		this.collection = self;
-		this.data = {};
 
 		extend(this, self.Document.initial, true);
 		extend(this, new Mote.Publisher);
-		extend(this.data, data);
+		extend(this, data);
 	}
 
-	self.Document.initial = { data: {} };
+	self.Document.initial = {};
 	self.Document.prototype = Mote.Util.clone(Mote.Document);
 	
 	// run user provided initialization
@@ -90,7 +84,7 @@ Mote.Collection.prototype = {
 			match = true;			
 			
 			for (key in queries) {
-				if (queries[key] !== '*' && doc.data[key] != queries[key] && doc[key] != queries[key]) {
+				if (queries[key] !== '*' && doc[key] != queries[key] && doc[key] != queries[key]) {
 					match = false;
 					break;
 				}
@@ -237,7 +231,7 @@ Mote.Document = {
 
 	collapse: function() {
 
-		var data = this.data,
+		var data = this,
 		    keys = this.collection.keys,
 		    collapsed = {},
 		    key;
@@ -256,7 +250,7 @@ Mote.Document = {
 	},
 	
 	clone: function() {
-		var clone = new this.collection.Document(this.data);
+		var clone = new this.collection.Document(this);
 		clone._mote_id = this._mote_id;
 		return clone;
 	}
@@ -337,14 +331,14 @@ Mote.EmbeddedDocuments.prototype = {
     embeds_many: function(col) {
 		var name = col.name;
 		this.keys.push(name);
-		this.Document.initial.data[name] = col;
+		this.Document.initial[name] = col;
     },
     
     embeds_one: function(col) {
 		var name = Mote.Naming.singularize(col.name)
 		this.keys.push(name);
 		col.cap_size = 1;
-		this.Document.initial.data[name] = col;
+		this.Document.initial[name] = col;
     }
 }
 
@@ -362,7 +356,8 @@ Mote.EmbeddedDocuments.document_prototype = {
 		for (; i < len; i++) {
 			key = keys[i];
 			if (key === col_name || key === doc_name) {
-			    return this.data[key].insert(doc);
+				doc.collection = this[key];
+				return doc.save();
 			}
 		}
 		

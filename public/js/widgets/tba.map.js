@@ -1,7 +1,7 @@
 tba.map = Fugue.create('map', {
 	
 	events: {
-		'app.ready': 'refresh'
+		'tba.app.ready': 'refresh'
 	},
 	
 	_markers: [],
@@ -21,8 +21,6 @@ tba.map = Fugue.create('map', {
 	},
 	
 	refresh: function() {
-		tba.current_trip.data.locations.subscribe('change.remove', this.remove, this);
-		tba.current_trip.data.locations.subscribe('change.insert', this.add, this);
 	},
 	
 	remove: function(location) {
@@ -33,7 +31,7 @@ tba.map = Fugue.create('map', {
 		
 		for (; i < len; i++) {
 			marker = markers[i];
-			if (marker.position.lat() === location.data.lat && marker.position.lng() === location.data.lng) {
+			if (marker.position.lat() === location.lat && marker.position.lng() === location.lng) {
 				removed = this._markers.splice(i, 1);
 				removed[0].setMap(null);
 				removed = this._overlays.splice(i, 1);
@@ -57,8 +55,8 @@ tba.map = Fugue.create('map', {
 	},
 	
 	focus: function(location_id) {
-		var location = tba.current_trip.data.locations.find_one({'_mote_id' : location_id }),
-			latlng = new google.maps.LatLng(location.data.lat, location.data.lng);
+		var location = tba.current_trip.locations.find_one({'_mote_id' : location_id }),
+			latlng = new google.maps.LatLng(location.lat, location.lng);
 		
 		this._map.setCenter(latlng);
 		this._map.setZoom(15);
@@ -111,8 +109,8 @@ tba.map = Fugue.create('map', {
 	_generate_marker: function(location) {
 
 		var self = this,
-			lat = location.data.lat,
-			lng = location.data.lng,
+			lat = location.lat,
+			lng = location.lng,
 			latlng = new google.maps.LatLng(lat, lng),
 			marker = new google.maps.Marker({
 				map: self._map,
@@ -129,12 +127,13 @@ tba.map = Fugue.create('map', {
 			overlay_content = document.body.appendChild(tba.views.map.overlay(overlay_id)),
 			info_window = new google.maps.InfoWindow({ content: overlay_content }),
 			widget = Fugue.create(overlay_id, tba.overlay_config);
-		
+
 		widget.info_window = info_window;
 		this._overlays.push(widget);
 		
 		google.maps.event.addListener(marker, 'click', function() {
 			info_window.open(marker.getMap(), marker);
+			tba.current_trip.current_location = location;
 		});
 	}
 });

@@ -1,8 +1,7 @@
-tba.Associates = new Mote.Collection(function() {
-	this.name = 'associates';
-	this.keys = [
-		'name'
-	];
-});
+tba.Associate = function() {
+  Remotely.decorate(this);
+}
 
-
+tba.Associate.prototype = {
+  
+}

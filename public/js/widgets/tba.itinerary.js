@@ -1,7 +1,7 @@
 tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	
 	events: {
-		'app.ready': 'refresh',
+		'tba.app.ready': 'refresh',
 		'input blur': 'create_location',
 		'a.delete click': function(e) {
 
@@ -10,7 +10,7 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 
 			e.preventDefault();
 
-			tba.current_trip.data.locations.remove(_mote_id);
+			tba.current_trip.locations.remove(_mote_id);
 		},
 		'a.focus click': function(e) {
 			
@@ -29,22 +29,22 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 
 		var value = e.target.value; 
 		if ( value === '' ) return;
-		
+
 		this.form.removeClass('error');
 
 		tba.map.geocode(value, function(results) {
 
 			var result = results[0],
 				loc = result.geometry.location;
-				
-			tba.current_trip.embed(new tba.current_trip.data.locations.Document({ 
-				address: result.formatted_address,
-				lat: loc.lat(),
-				lng: loc.lng()
-			}));
-			
-		});
-		
+        loc_obj = { 
+  				address: result.formatted_address,
+  				lat: loc.lat(),
+  				lng: loc.lng()
+  			};
+  			
+      tba.app.trip.locations.push(loc_obj);
+		  tba.app.trip.publish('location_added', loc_obj);
+		});  
 	},
 
 	error: function(errors) {
@@ -67,14 +67,10 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 	
 	refresh: function() {
 
-		var trip = tba.current_trip,
-			list = tba.views.itinerary.list(trip.data.locations);
-			
+		var trip = tba.app.trip,
+			list = tba.views.itinerary.list(trip.locations);
+
 		this.query('#itinerary').html(list);
 		this.form = this.$container.find('li').last();
-		
-		tba.current_trip.data.locations.subscribe('change.insert', this.add, this);
-		tba.current_trip.data.locations.subscribe('error.insert', this.error, this);
-		tba.current_trip.data.locations.subscribe('change.remove', this.remove, this);
 	}
 });
