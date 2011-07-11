@@ -8,6 +8,26 @@ var Mote = {
 	version: '0.1'
 };
 
+Mote.Collection = function(name, keys) {
+
+	Remotely.decorate(this);
+
+	this.name = name;
+	this.keys = keys || [];
+	this.errors = {};
+	
+	this.generate_crud(name);
+}
+
+Mote.Collection.prototype = {
+
+	save: function(obj) {
+		this[ obj['$oid'] ? 'update' : 'insert' ](obj);
+	},
+
+	validate: function(obj) { return true }
+}
+
 Mote.Collection = function(block) {
 	
 	var self = this;

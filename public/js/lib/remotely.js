@@ -4,7 +4,6 @@ var Remotely = (function() {
 
 	Obj = function(src) {
 		this.keys = src.keys || [];
-		this.subscriptions = { '*': [] };
 	};
 
 	Obj.prototype = {
@@ -21,36 +20,19 @@ var Remotely = (function() {
 			    }
 			}
 		},
+
+		generate_crud: function(name) {
+			this.route('read', 'GET ' + name);
+			this.route('insert', 'POST ' + name);
+			this.route('update', 'PUT ' + name + '/:id');
+			this.route('delete', 'DELETE ' + name + '/:id');
+		},
 	    
 		to_json: function() {
-			return JSON.stringify(this._collapse());
-		},
-	    
-		subscribe: function(topic, fn, scope) {
-	
-			if (typeof topic === 'function') {
-				scope = fn;
-				fn = topic;
-				topic = '*';
-			}
-	
-			fn.scope = scope || this;
-			(this.subscriptions[topic] || (this.subscriptions[topic] = [])).push(fn);
-		},
-	
-		publish: function(topic, data) {
-	
-			var subs = (this.subscriptions[topic] || []).concat(this.subscriptions['*']),
-			    nss = topic.split('.'),
-			    len = subs.length,
-		        i = 0;
-	
-			while (nss[0]) subs.concat(this.subscriptions[nss.shift()] || []);
-	
-			for (; i < len; i++) subs[i].call(subs[i].scope || this, data, this);
+			return JSON.stringify(this.collapse());
 		},
 		
-		_collapse: function() {
+		collapse: function() {
 			
 			var data = {}, 
 			    keys = this.keys,
@@ -58,7 +40,7 @@ var Remotely = (function() {
 			
 			for (key in this) {
 				prop = this[key];
-				if (keys.indexOf(key) === -1) continue;
+				if (keys[0] && keys.indexOf(key) === -1) continue;
 				data[key] = typeof prop._collapse === 'function' ? prop._collapse() : prop;
 			}
 			
