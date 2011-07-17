@@ -121,6 +121,8 @@ var Remotely = (function() {
 
 
 	return {
+    
+    Obj: Obj,
 
 		decorate: function(src) {
 			var obj = new Obj(src);
