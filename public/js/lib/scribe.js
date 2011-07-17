@@ -11,10 +11,10 @@ var Scribe = (function() {
 			var event = this._parse_event_string(str),
 			    names = event.names,
 			    target = event.target,
-			    subs = (this.subscriptions[topic] || []).concat(this.subscriptions['*']),
+			    subs = this.subscriptions['*'],
 			    sub, len, i = 0;	
-	
-			while (names[0]) subs.concat(this.subscriptions[names.shift()] || []);
+			    
+			while (names[0]) subs = subs.concat(this.subscriptions[names.shift()] || []);
 			
 			len = subs.length;
 			for (; i < len; i++) {
@@ -25,7 +25,7 @@ var Scribe = (function() {
 			return this;
 		},
 
-		subscribe: funcion(str, fn, scope) {
+		subscribe: function(str, fn, scope) {
 
 			var event = this._parse_event_string(str),
 			    target = event.target,
@@ -68,7 +68,7 @@ var Scribe = (function() {
 			    names = path.pop().split(':'),
 			    target = (path[0]) ? window : this;
 
-			while (parts[0]) target = target[ parts.shift() ];
+			while (path[0]) target = target[ path.shift() ];
 	
 			return { names: names, target: target }
 		}

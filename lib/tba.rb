@@ -10,6 +10,7 @@ require File.join(File.dirname(__FILE__), "./tba/strategies.rb")
 Dir.glob(File.join(File.dirname(__FILE__), "./tba/helpers/*.rb")) { |file| require file }
 require File.join(File.dirname(__FILE__), "./tba/apps/base.rb")
 Dir.glob(File.join(File.dirname(__FILE__), "./tba/apps/*.rb")) { |file| require file }
+Dir.glob(File.join(File.dirname(__FILE__), "./tba/models/*.rb")) { |file| require file }
 
 if ENV['MONGOHQ_URL']
   db_name = URI.parse(ENV['MONGOHQ_URL']).path.gsub(/^\//, '')
@@ -19,4 +20,5 @@ else
   conn = Mongo::Connection.new
 end
 
-TBA::Database = conn.db(db_name)
+MongoMapper.connection = conn
+MongoMapper.database = db_name

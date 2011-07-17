@@ -1,8 +1,9 @@
 class TBA::Trips < TBA::Base
 
   get '/' do
-    @trips = Trip.find
-    haml :trips
+    trips = Trip.find
+    content_type :json
+    trips.to_json
   end
   
   post '/' do

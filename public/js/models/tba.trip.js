@@ -1,6 +1,6 @@
 tba.Trip = function(data) {
   Remotely.decorate(this);
-  this.generate_crud();
+  this.generate_crud('trips');
 
   this.name = '';
   this.locations = new Remotely.Collection();

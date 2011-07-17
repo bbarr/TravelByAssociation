@@ -1,8 +1,7 @@
 source "http://rubygems.org"
 
 #gem "mote", :git => "git://github.com/dgalarza/mote.git"
-gem "mongo"
-gem "bson"
+gem "mongo_mapper"
 gem "sinatra"
 gem "haml"
 gem "rack-flash"
