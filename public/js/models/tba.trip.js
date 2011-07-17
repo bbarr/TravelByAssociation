@@ -1,7 +1,6 @@
 tba.Trip = function(data) {
-
-  this.remote = new Remotely.Obj();  
-  this.remote.generate_crud();
+  Remotely.decorate(this);
+  this.generate_crud();
 
   this.name = '';
   this.locations = new Remotely.Collection();
@@ -10,5 +9,7 @@ tba.Trip = function(data) {
 
 tba.Trip.prototype = {
   
-  
+  collapse: function() {
+    return { 'blah': 'foo' };
+  }
 };

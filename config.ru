@@ -18,7 +18,3 @@ end
 map "/trips" do
 	run TBA::Trips
 end
-
-map "/db" do
-	run TBA::JSONProxy.new
-end
