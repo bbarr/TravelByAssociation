@@ -8,20 +8,18 @@
  *  @author Brendan Barr brendanbarr.web@gmail.com
  */
 
-(function() {
+var Fugue = (function() {
 
 	var Widget = function(name, query, ext) {
 		
 		this.name = name;
 		this.$container = $(query).first();
 
-		this.subscriptions = { '*': [] };
 		this.elements = {};
 		this.states = {};
-
+	
+		if (this.init) this.init();
 		this.extend(ext);
-		
-    if (this.init) this.init();		
 	}
 
 	Widget.prototype = {
@@ -72,74 +70,6 @@
 			return this.elements[query] || (this.elements[query] = this.$container.find(query));
 		},
 
-		publish: function(event_string, data, scope) {
-
-			var self = this,
-			    event = this._parse_event_string(event_string),
-			    target = event.target,
-			    name = event.name,
-			    subscriptions = (target.subscriptions[name] || []).concat(target.subscriptions['*']),
-			    len = subscriptions.length,
-			    i = 0, fn;
-
-			for (; i < len; i++) {
-			  fn = subscriptions[i];
-			  fn.call(fn.scope, data);
-      }
-      
-			return this;
-		},
-
-		subscribe: function(event_string, fn, scope) {
-
-			var event = this._parse_event_string(event_string),
-			    target = event.target,
-			    name = event.name,
-			    fns = target.subscriptions[name] || (target.subscriptions[name] = []);
-      
-      fn.scope = scope || this;
-			fns.push(fn);
-			return this;
-		},
-
-		unsubscribe: function(event, fn) {
-		    
-			var fns = this.subscriptions[event], 
-			    len = fns.length, 
-			    i = 0;
-
-			for (; i < len; i++) {
-				if (fns[i] === fn) {
-					fns.splice(i, 1);
-          break;
-				}
-			}
-
-			return this;
-		},
-
-		// PRIVATE
-		
-		  _parse_event_string: function(string) {
-		    
-		    var parts = string.split('.'),
-		        name = parts.pop(),
-		        target = window;
-
-        if (parts.length === 0) target = this;
-        else {
-          
-          if (parts[0] === 'this') {
-            target = this;
-            parts.shift();
-          }
-          
-          while (parts[0]) target = target[ parts.shift() ];
-        }
-		    
-		    return { name: name, target: target };
-		  },
-
 			_bind: function(events) {
 
 				var query, key, prop, type, cb, scoped_cb,
@@ -165,7 +95,7 @@
 		// END PRIVATE
 	}
 
-	window.Fugue = {
+	return {
 		
 		create: function(name, query, ext) {
 			
