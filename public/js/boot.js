@@ -2,12 +2,13 @@
 var tba = {};
 
 (function() {
-
+  
+  if (!document.getElementById('itinerary')) return;
+  
 	var index = 0,
 		scripts = [
 			'lib/jquery.js',
 			'lib/jquery.build.js',
-			'lib/mote.js',
 			'lib/remotely.js',
 			'lib/fugue.js',
 			'lib/scribe.js',			
@@ -26,7 +27,7 @@ var tba = {};
 			
 			var uri = scripts[index];
 			if (!uri) {			  
-				tba.app.refresh();
+        tba.app.refresh();
 				return;
 			}
 

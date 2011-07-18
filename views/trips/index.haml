@@ -1,1 +1,5 @@
-trips
+%ul
+  - @trips.each do |t|
+    %li
+      %a{ :href => "/trips/#{t._id}" }
+        = t.title

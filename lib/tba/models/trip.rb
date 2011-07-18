@@ -1,9 +1,13 @@
 class Trip
   include MongoMapper::Document
   
-  key :name, String, :required => true
-  key :locations, Array
-  key :transits, Array
+  key :user_id, ObjectId
+  key :title, String
+  key :admin_phrase, String
+  key :associate_phrase, String
   
+  many :locations
+  many :transits
   
+  validates_presence_of :title
 end

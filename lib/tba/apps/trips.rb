@@ -1,31 +1,28 @@
 class TBA::Trips < TBA::Base
 
   get '/' do
-    trips = Trip.find
-    content_type :json
-    trips.to_json
+    @trips = Trip.fields(:_id, :title, :user_id).all
+    haml :"trips/index"
   end
   
   post '/' do
-    must_be_someone
+    must_be_admin
 
     trip = Trip.new params[:trip]
 
     if trip.save
-      flash[:notice] = 'Trip created'
-      redirect "/trips/#{trip['_id']}"
+      redirect "/trips/#{trip[:_id]}"
     else
-      flash[:errors] = trip.errors.to_s
-      redirect "/"
+      content_type :json
+      status 400
+      trip.errors.to_json
     end
-    
   end
 
   get '/:trip_id' do
     must_be_someone
-    
     @trip = Trip.find_by_id params[:trip_id]
-    haml :trip
+    haml :"trips/show"
   end
   
   delete '/:trip_id' do

@@ -7,8 +7,8 @@ use Rack::PostBodyContentTypeParser
 use Warden::Manager do |manager|
 	manager.default_strategies :password
 	manager.failure_app = TBA::Default
-	manager.serialize_into_session { |account| account['_id'] }
-	manager.serialize_from_session { |id| Account.find '_id' => id }
+	manager.serialize_into_session { |account| account.role }
+	manager.serialize_from_session { |role| Account.new role }
 end
 
 map "/" do

@@ -2,9 +2,9 @@ require "rake"
 require "./lib/tba.rb"
 
 task :seed do
-  Account.create :email => 'email', :password => 'password'
+  Trip.create(:title => 'a trip!')
 end
 
 task :truncate do
-  Account.collection.drop
+  
 end

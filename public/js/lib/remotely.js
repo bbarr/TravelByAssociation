@@ -15,11 +15,7 @@ var Remotely = (function() {
 		to_json: function() {
 			return JSON.stringify(this.collapse());
 		},
-		
-		collapse: function() {
-			return this;
-		},
-	
+
 		generate_crud: function(name) {
 			this.route({
 			  read: 'GET ' + name,

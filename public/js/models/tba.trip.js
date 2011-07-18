@@ -10,6 +10,6 @@ tba.Trip = function(data) {
 tba.Trip.prototype = {
   
   collapse: function() {
-    return { 'blah': 'foo' };
+    return this;
   }
 };

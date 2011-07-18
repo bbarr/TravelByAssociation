@@ -7,5 +7,5 @@ class TBA::Base < Sinatra::Base
   
   helpers ViewHelpers
   helpers SessionHelpers
-    
+  
 end
