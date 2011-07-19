@@ -16,5 +16,7 @@ tba.app = Fugue.create('app', document.body, {
 		
 		if (id) this.trip.download(id);
 		else this.publish('ready');
-	}
+	},
+	
+	
 });

@@ -21,6 +21,7 @@ var tba = {};
 			'widgets/tba.itinerary.js',
 			'widgets/tba.map.js',
 			'widgets/tba.overlays.js',
+			'widgets/tba.facebook.js',			
 			'tba.views.js'
 		],
 		dequeue = function() {

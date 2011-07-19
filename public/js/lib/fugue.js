@@ -11,22 +11,27 @@
 var Fugue = (function() {
 
 	var Widget = function(name, query, ext) {
+
+		Remotely.decorate(this);
 		
 		this.name = name;
 		this.$container = $(query).first();
 
 		this.elements = {};
 		this.states = {};
-	
-		if (this.init) this.init();
+
 		this.extend(ext);
+		
+		if (this.init) this.init();
 	}
 
 	Widget.prototype = {
 
 		extend: function(obj) {
+
 			var key,
 			    has_events = false;
+			    
 			for (key in obj) {
 				if (key === 'events') {
 				  has_events = true;
@@ -34,7 +39,8 @@ var Fugue = (function() {
 				}
 				else this[key] = obj[key];
 			}
-			if (has_events) this._bind(obj.events);
+
+			if (has_events) this._extend_events(obj.events);
 			return this;
 		},
 
@@ -70,7 +76,9 @@ var Fugue = (function() {
 			return this.elements[query] || (this.elements[query] = this.$container.find(query));
 		},
 
-			_bind: function(events) {
+    // PRIVATE
+
+			_extend_events: function(events) {
 
 				var query, key, prop, type, cb, scoped_cb,
 				    self = this;
@@ -82,7 +90,7 @@ var Fugue = (function() {
 					cb = typeof prop === 'string' ? this[prop] : prop;
 
           scoped_cb = function() { cb.apply(self, arguments) };
-
+          
 					if (query.length > 0) {
 						this.$container.delegate(query.join(' '), type, scoped_cb);
 					} 
@@ -91,8 +99,9 @@ var Fugue = (function() {
 					}
 				}
 			}
-
+			
 		// END PRIVATE
+		
 	}
 
 	return {
