@@ -140,6 +140,8 @@ var Remotely = (function() {
 	return {
     
     Obj: Obj,
+    Request: Request,
+    Response: Response,
     Collection: Collection,
     
 		decorate: function(src) {

@@ -4,7 +4,7 @@ tba.views = {
 		
 		list: function(locations) {
 
-			var list = $.build('fragment'),
+			var list = document.createDocumentFragment,
 				self = tba.views.itinerary,
 				location = self.location,
 				location_input = self.location_input,
@@ -22,41 +22,44 @@ tba.views = {
 		},
 		
 		location: function(location) {
-			var b = $.build;
-			return b('li', { 'class': 'location', 'id': 'location-' + location._mote_id }, [
-					b('a', { href: '#', 'class': 'delete' }, 'X'),
-					b('a', { href: '#', 'class': 'focus' }, '+'),
-					b('h3', location.address)
-				]);
+
+			var template = Template
+				.li({ 'class': 'location', id: 'location-' + location._mote_id })
+					.a({ href: '#', 'class': 'delete' }).end()
+					.a({ href: '#', 'class': 'focus' }).end()
+					.h3(location.address)
+
+			return template.to_html();
 		},
 		
 		location_input: function() {
-			var b = $.build;
-			return b('li', { 'class': 'location'}, [
-				b('h3', 'Add Location'),
-				b('input', { name: 'address', type: 'text', placeholder: 'Address' })
-			]);
+
+			var template = new Template()
+				.li({ 'class': 'location' })
+					.h3('Add Location').end()
+					.input({ name: 'address', type: 'text', placeholder: 'Address' });
+			
+			return template.to_html();
 		}
 	},
 	
 	map: {
 		
 		overlay: function(id) {
-			var b = $.build;
-			return b('div', { id: id, 'class': 'location-overlay' }, [
-				tba.views.map.needs,
-				b('div', { 'id': 'solutions' })
-			]);
-		},
-		
-		needs: function() {
-			var b = $.build;
-			return b('div', { 'class': 'needs' }, [
-				b('h3', 'Needs'),
-				b('ul', [
-					b('li', b('input', { 'type': 'text' }))
-				])
-			]);
+
+			var template = new Template()
+				.div({ id: id, 'class': 'location-overlay' })
+					.div({ 'class': 'needs' })
+						.h3('Needs').end()
+						.ul()
+							.li()
+								.input({ type: 'text' })
+							.end()
+						.end()
+					.end()
+					.div({ id: 'solutions' });
+			
+			return template.to_html();
 		},
 		
 		need: function(need) {

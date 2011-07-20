@@ -4,27 +4,17 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 		'tba.app.ready': 'refresh',
 		'input blur': 'create_location',
 		'a.delete click': function(e) {
-
-			var $el = $(e.currentTarget).parent('li'),
-				_mote_id = $el.attr('id').split('-')[1];
-
 			e.preventDefault();
-
-			tba.current_trip.locations.remove(_mote_id);
+			tba.app.trip.locations.remove(this._extract_location_id(e));
 		},
 		'a.focus click': function(e) {
-			
-			var $el = $(e.currentTarget).parent('li'),
-				_mote_id = $el.attr('id').split('-')[1];
-
 			e.preventDefault();
-
-			tba.map.focus(_mote_id);
+			tba.map.focus(this._extract_location_id(e));
 		}
 	},
 	
 	init: function() {},
-	
+
 	create_location: function(e) {
 
 		var value = e.target.value; 
@@ -72,5 +62,10 @@ tba.itinerary = Fugue.create('itinerary', 'sidebar', {
 
 		this.query('#itinerary').html(list);
 		this.form = this.$container.find('li').last();
-	}
+	},
+
+	_extract_location_id: function(e) {
+		var $el = $(e.currentTarget).parent('li'),
+		return $el.attr('id').split('-')[1];
+	},
 });
