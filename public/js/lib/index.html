@@ -6,40 +6,34 @@
 	
 	<script src="template.js"></script>
 	<script>
-		var template = new Template;
-
-		template
-			.div()
+		
+		Marker.register('short_example', function() {
+			
+			this.div()
 				.p('this is a paragraph ')
 					.a({ href: '#' }, 'a link');
+		});
+			
 
-		document.body.appendChild(template.to_html());		
+		document.body.appendChild(Marker.render('short_example'));	
 
-		template
-			.div()
-				.text('some text stuff in the div')
-				.div({ 'class': 'a-class' })
-					.p('another paragraph');
-				
+		Marker.register('long_example', function(data) {
 
-		document.body.appendChild(template.to_html());
+			this.div()
+				.h3('a header').end()
+				.div({ className: 'inner' })
+					.p()
+						.text('some paragraph text ')
+						.a({ href: '#' }, 'a link').end()
+						.text('some more text')
+					.end()
+				.end()
+				.partial('short_example')
+				.section()
+					.span(data.foo);
+		});
 
-		/* RESULTS IN THIS HTML
-
-		<div>
-			<p>
-				this is a paragraph
-				<a href="#">a link</a>
-			</p>
-		</div>
-		<div>
-			some text stuff in the div
-			<div class="a-class">
-				<p>another paragraph</p>
-			</div>
-		</div>
-
-		*/
+		document.body.appendChild(Marker.render('long_example', { foo: 'bar' }));
 
 	</script>
 </body>
