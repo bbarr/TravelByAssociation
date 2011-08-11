@@ -11,7 +11,7 @@ tba.app = Fugue.create('app', document.body, {
 	
   refresh: function() {
 
-    var hash = window.location.hash,
+    var hash = window.location.hash,  
         id = (hash) ? hash.substr(1) : false;
 
     if (id) {

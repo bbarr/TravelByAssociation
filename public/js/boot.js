@@ -7,22 +7,7 @@ var tba = {};
   
 	var index = 0,
 		scripts = [
-			'lib/jquery.js',
-			'lib/jquery.build.js',
-			'lib/remotely.js',
-			'lib/fugue.js',
-			'lib/scribe.js',			
-			'models/tba.need.js',
-			'models/tba.associate.js',
-			'models/tba.location.js',
-			'models/tba.transit.js',
-			'models/tba.trip.js',
-			'widgets/tba.app.js',
-			'widgets/tba.itinerary.js',
-			'widgets/tba.map.js',
-			'widgets/tba.overlays.js',
-			'widgets/tba.facebook.js',			
-			'tba.views.js'
+
 		],
 		dequeue = function() {
 			
