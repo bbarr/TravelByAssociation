@@ -12,7 +12,7 @@ var Scribe = (function() {
 			    names = event.names,
 			    target = event.target,
 			    subs = this.subscriptions['*'],
-			    sub, len, i = 0;	
+			    sub, len, i = 0;
 			    
 			while (names[0]) subs = subs.concat(this.subscriptions[names.shift()] || []);
 			

@@ -1,7 +1,7 @@
 class TBA::Default < TBA::Base
 
   get "/" do
-    haml :"trips/show"
+    haml :index
   end
   
 end

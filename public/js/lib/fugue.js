@@ -26,14 +26,14 @@ var Fugue = (function() {
 		},
 
 		extend: function(obj) {
-
-			if (typeof obj.events !== 'undefined') {
-				this._extend_events(obj.events);
-				delete obj.events;
-			}			
-
+		  
 			for (key in obj) {
+			  if (key === 'events') continue;
 				this[key] = obj[key];
+			}
+			
+			if (typeof obj.events !== 'undefined') {
+			  this._extend_events(obj.events);
 			}
 
 			return this;
@@ -64,6 +64,12 @@ var Fugue = (function() {
 
 		// PRIVATE
 
+      _generate_scoped_cb: function(self, cb) {
+        return function() {
+          cb.apply(self, arguments);
+        }
+      },
+
 			_extend_events: function(events) {
 
 				var query, key, prop, type, cb, scoped_cb,
@@ -74,7 +80,7 @@ var Fugue = (function() {
 					query = key.split(' ');
 					type = query.pop();
 					cb = typeof prop === 'string' ? this[prop] : prop;
-					scoped_cb = function() { cb.apply(self, arguments) };
+					scoped_cb = self._generate_scoped_cb(self, cb);
           
 					if (query.length > 0) {
 						this.$container.delegate(query.join(' '), type, scoped_cb);
