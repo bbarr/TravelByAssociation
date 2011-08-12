@@ -12,8 +12,8 @@
 
       #content
         #backdrop
-        %sidebar
-          %ul{ :id => 'itinerary' }
+        %sidebar{ :id => 'itinerary' }
+          %ul
 
         #map
         
@@ -32,5 +32,10 @@
     -# application JS
     %script{ :src => '/js/tba.js' }    
     %script{ :src => '/js/tba.models.js' }
-    %script{ :src => '/js/tba.modules.js' }
     %script{ :src => '/js/tba.views.js' }
+    %script{ :src => '/js/tba.modules.js' }
+    
+    - if @trip
+      :javascript
+        tba.app.trip = #{ @trip.to_json }
+        

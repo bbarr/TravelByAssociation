@@ -1,68 +1,91 @@
-if (typeof tba === 'undefined') {
-  var tba = {};
-}
-
 tba.Trip = function(data) {
   
   Remotely.decorate(this);
   this.generate_crud('trips');
 
-  this.locations = [];
+  this.name = '';
+  this.locations = [];  
   this.transits = [];
+  this.associates = [];
 }
 
 tba.Trip.prototype = {
-  
+
   collapse: function() {
-    return this;
+    
+    var self = this;
+    
+    return {
+      name : self.name,
+      locations: self.locations,
+      transits: self.transits,
+      associates: self.associates
+    }
   }
 };
 
 tba.Transit = function() {
-  
-	this.keys = [
-		'start_date',
-		'end_date',
-		'means',
-		'duration'
-	];	
+  this.needs = [];
 };
 
 tba.Transit.prototype = {
    
+   collapse: function() {
+     
+     var self = this;
+     
+     return {
+       date: self.date,
+       means: self.means,
+       needs: self.needs
+     }
+   }
 }
 
-tba.Needs = function() {
-
-	this.keys = [
-		'need',
-		'solutions',
-	];
+tba.Need = function() {
+  
 };
 
-tba.Needs.prototype = {
-
+tba.Need.prototype = {
+  
+  collapse: function() {
+    
+    var self = this;
+    
+    return {
+      solutions: self.solutions
+    }
+  }
 }
 
 tba.Location = function() {
-	
-	this.keys = [
-		'address',
-		'lat',
-		'lng',
-		'start_date',
-		'end_date'
-	];
+  this.needs = [];
 };
 
 tba.Location.prototype = {
   
+  collapse: function() {
+    
+    var self = this;
+    
+    return {
+      needs: self.needs
+    }
+  }
 }
 
 tba.Associate = function() {
-
+  this.name = '';
 }
 
 tba.Associate.prototype = {
   
+  collapse: function() {
+    
+    var self = this;
+    
+    return {
+      name: self.name
+    }
+  }
 }
