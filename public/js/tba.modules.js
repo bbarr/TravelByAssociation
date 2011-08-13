@@ -14,7 +14,7 @@ tba.itinerary = Fugue.create('itinerary', {
 	},
 	
 	refresh: function() {
-
+    
 	}
 	
 });
@@ -26,7 +26,11 @@ tba.map = Fugue.create('map', {
 	},
 	
 	refresh: function() {
-
+	  
+    this.map = new google.maps.Map({
+      
+    });
+    console.log(this.map);
 	}
 	
 });
