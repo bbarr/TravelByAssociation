@@ -1,4 +1,6 @@
-tba.Trip = function(data) {
+tba.models = {};
+
+tba.models.Trip = function(data) {
   
   Remotely.decorate(this);
   this.generate_crud('trips');
@@ -9,7 +11,7 @@ tba.Trip = function(data) {
   this.associates = [];
 }
 
-tba.Trip.prototype = {
+tba.models.Trip.prototype = {
 
   collapse: function() {
     
@@ -24,11 +26,11 @@ tba.Trip.prototype = {
   }
 };
 
-tba.Transit = function() {
+tba.models.Transit = function() {
   this.needs = [];
 };
 
-tba.Transit.prototype = {
+tba.models.Transit.prototype = {
    
    collapse: function() {
      
@@ -42,11 +44,11 @@ tba.Transit.prototype = {
    }
 }
 
-tba.Need = function() {
+tba.models.Need = function() {
   
 };
 
-tba.Need.prototype = {
+tba.models.Need.prototype = {
   
   collapse: function() {
     
@@ -58,11 +60,11 @@ tba.Need.prototype = {
   }
 }
 
-tba.Location = function() {
+tba.models.Location = function() {
   this.needs = [];
 };
 
-tba.Location.prototype = {
+tba.models.Location.prototype = {
   
   collapse: function() {
     
@@ -74,11 +76,11 @@ tba.Location.prototype = {
   }
 }
 
-tba.Associate = function() {
+tba.models.Associate = function() {
   this.name = '';
 }
 
-tba.Associate.prototype = {
+tba.models.Associate.prototype = {
   
   collapse: function() {
     

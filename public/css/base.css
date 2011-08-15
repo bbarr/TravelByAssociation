@@ -4,193 +4,139 @@
 }
 
 body {
-	width: 1024px;
-	margin: 0 auto;
 	color: #222;
-	font-family: arial, sans-serif;
+	font-family: Helvetica, sans-serif;
 }
 
-#container {
-	padding: 0 20px 20px;
-}
-
-#backdrop {
-	background: #fff;
-	opacity: .4;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	display: none;
-}
-
-.is_loading #backdrop {
-	display: block;
+a {
+  text-decoration: none;
 }
 
 .hide {
-	display: none !important;
-}
-
-li {
-	list-style: none;
-}
-
-header {
-	margin-bottom: 10px;
-	overflow: hidden;
-}
-
-header nav {
-	float: right;
-	margin-top: 10px;
-}
-
-header nav li {
-	float: left;
-	font-size: 12px;
-	margin-right: 10px;
-	padding-right: 10px;
-	border-right: 1px solid #000;
-}
-
-header nav li:last-child {
-	margin-right: 0;
-	padding-right: 0;
-	border-right: none;
-}
-
-header nav a {
-	text-decoration: none;
-	color: #000;
-}
-
-header h1 {
-	width: 200px;
-	margin: 0;
-	border: 1px solid #fff;
-	margin-right: 20px;
-	border-top: none;
-	float: left;
-}
-
-sidebar {
-	float: left;
-	width: 200px;
-	border: 1px solid #000;
-	margin: 0 20px 0 0;
-	height: 500px;
-}
-
-.location {
-	margin: 5px;
-	padding: 10px;
-	border: 1px solid #aaa;
-	position: relative;
-}
-
-.location .delete {
-	position: absolute;
-	top: 0;
-	right: 0;
-	color: #fff;
-	background: #f00;
-	padding: 2px 5px;
-	text-decoration: none;
-	font-size: 12px;
-}
-
-.location .focus {
-   	border: 1px solid #000000;
-    border-radius: 10px 10px 10px 10px;
-    font-size: 28px;
-    line-height: 16px;
-    padding: 0;
-    position: absolute;
-    right: 0;
-    text-decoration: none;
-    top: 20px;
-}
-
-.error input {
-	border: 1px solid red !important;
-	color: red;
-}
-
-.location h3 {
-
-}
-
-.location input {
-	margin-top: 10px;
-	border: 1px solid #222;
-	padding: 5px;
-	width: 156px;
-}
-
-#flash {
-	overflow: hidden;
-	font-size: 16px;
-}
-
-#flash li {
-	padding: 5px 10px;
-	margin: 0 0 5px;
-}
-
-#flash .notice {
-	background: #ffd700;
-}
-
-#flash .error {
-	background: #ff0000;
-}
-
-#flash span {
-	display: none;
-	float: right;
-	color: #fff;
-	font-size: 12px;
-	line-height: 16px;
-}
-
-#flash div {
-	padding-right: 90px;
-}
-
-#flash li:hover {
-	cursor: pointer;
-}
-
-#flash li:hover span {
-	display: inline;
+  display: none !important;
 }
 
 #map {
-	border: 1px solid #aaa;
-	height: 500px;
-	margin: 0;
-	overflow: hidden;
+  position: absolute;
+  top: 30px;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
-.location-overlay {
-	width: 500px;
-	height: 400px;
+header {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  background: #222;
+  height: 30px;
+  line-height: 30px;
+  color: #eee;
+  padding: 0 20px;
 }
 
-.location-overlay .needs {
-	float: left;
-	border-right: 1px solid #aaa;
-	margin: 0 10px 0 0;
-	height: 310px;
-	width: 180px;
+header h1 {
+  font-size: 22px;
 }
 
-.location-overlay .solutions {
-	height: 310px;
+header nav {
+  float: right;
 }
 
-footer {
-	clear: both;
+header nav a {
+  float: left;
+  color: #eee;
+  font-size: 20px;
+  margin-left: 20px;
+}
+
+#how_it_works {
+  border: 2px solid #eee;
+  border-radius: 15px;
+  width: 20px;
+  height: 20px;
+  line-height: 23px;
+  text-align: center;
+  margin-top: 2px;
+}
+
+sidebar {
+  position: absolute;
+  top: 50px;
+  right: auto;
+  bottom: 30px;
+  left: 0;
+  background: #fff;
+  opacity: .9;
+  width: 250px;
+  z-index: 100;
+  
+  -webkit-transition:all 0.8s ease-in-out;
+	-moz-transition:all 0.8s ease-in-out;
+	-o-transition:all 0.8s ease-in-out;
+	-ms-transition:all 0.8s ease-in-out;	
+	-transition:all 0.8s ease-in-out;
+	
+	-moz-box-shadow: 5px 5px 5px #aaa;
+  -webkit-box-shadow: 5px 5px 5px #aaa;
+  box-shadow: 5px 5px 5px #aaa;
+}
+
+sidebar .inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+sidebar.hidden {
+  left: -235px;
+  -webkit-transition:all 0.8s ease-in-out;
+	-moz-transition:all 0.8s ease-in-out;
+	-o-transition:all 0.8s ease-in-out;
+	-ms-transition:all 0.8s ease-in-out;	
+	-transition:all 0.8s ease-in-out;
+}
+
+sidebar .toggle {
+  position: relative;
+  display: none;
+}
+
+sidebar .toggle a {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  height: 30px;
+  width: 29px;
+  background-image: url('/img/toggle_sprite.png');
+  background-repeat: no-repeat;
+  background-position: 0 -31px;
+}
+
+sidebar.hidden .toggle a {
+  background-position: 0 0px;
+}
+
+sidebar .ad {
+  width: 234px;
+  height: 60px;
+  position: absolute;
+  bottom: 5px;
+  left: 8px;
+  background: #eee;
+}
+
+.overlay {
+  position: absolute;
+  z-index: 1000;
+  background: #fff;
+  border: 1px solid #aaa;
+  padding: 10px;
+}
+
+.overlay .close {
+  float: right;
+  margin: -10px -10px 0 0;
 }

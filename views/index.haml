@@ -1,35 +1,44 @@
-!!!
+!!! 5
 %html
   %head
     %link{ :rel => "stylesheet", :href => "/css/base.css" }
   %body
-    #container
-      #content
-        #backdrop
-        %sidebar{ :id => 'itinerary' }
-          %ul
 
-        #map
-        
-      %footer
+    #backdrop
+    
+    %header
+      %nav
+        %a{ :href => '#', :id => 'how_it_works', :title => 'How it works' } ?
+          
+      %h1 TravelByAssociation
+      
+    %sidebar{ :id => 'itinerary' }
+      .inner
+        %ul
+        .ad
+      
+    #map
+      
+    %footer
 
     -# external libraries
-    %script{ :src => 'http://maps.google.com/maps/api/js?sensor=false' }		
+    %script{ :src => 'http://maps.google.com/maps/api/js?sensor=false' }
     %script{ :src => "/js/lib/jquery.js" }
-    
+  
     -# my libraries
     %script{ :src => '/js/lib/scribe.js' }
-    %script{ :src => '/js/lib/template.js' }
+    %script{ :src => '/js/lib/marker.js' }
     %script{ :src => '/js/lib/remotely.js' }
     %script{ :src => '/js/lib/fugue.js' }
-
+  
     -# application JS
-    %script{ :src => '/js/tba.js' }    
+    %script{ :src => '/js/tba.js' }   
+    %script{ :src => '/js/lib/tba/tba.list.js' }    
     %script{ :src => '/js/tba.models.js' }
     %script{ :src => '/js/tba.views.js' }
     %script{ :src => '/js/tba.modules.js' }
-    
+  
     - if @trip
       :javascript
-        tba.app.trip = #{ @trip.to_json }
-        
+        tba.modules.app.trip = #{ @trip.to_json }
+      
