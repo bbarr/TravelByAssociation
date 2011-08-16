@@ -1,7 +1,8 @@
 Marker.register('itinerary_form', function() {
   this
     .li()
-      .input({ type: 'text' });
+      .label('Add location to trip...').end()
+      .input({ type: 'text', placeholder: 'eg: Boston, MA' });
 });
 
 Marker.register('itinerary_item', function(content) {
