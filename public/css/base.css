@@ -99,26 +99,6 @@ sidebar.hidden {
 	-transition:all 0.8s ease-in-out;
 }
 
-sidebar .toggle {
-  position: relative;
-  display: none;
-}
-
-sidebar .toggle a {
-  position: absolute;
-  top: -12px;
-  right: -12px;
-  height: 30px;
-  width: 29px;
-  background-image: url('/img/toggle_sprite.png');
-  background-repeat: no-repeat;
-  background-position: 0 -31px;
-}
-
-sidebar.hidden .toggle a {
-  background-position: 0 0px;
-}
-
 sidebar .ad {
   width: 234px;
   height: 60px;
@@ -139,4 +119,15 @@ sidebar .ad {
 .overlay .close {
   float: right;
   margin: -10px -10px 0 0;
+}
+
+#backdrop {
+  background: #fff;
+  opacity: .6;
+  position: absolute;
+  top: 30px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9999;
 }
