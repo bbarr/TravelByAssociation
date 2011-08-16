@@ -1,37 +1,100 @@
 var tba = (function() {
   
-  var App, models, views, util;
+  var App, collections, models, views, templates, util;
   
   /** Application **/
   App = Backbone.Router.extend({
     
     routes: {
       '': 'index',
-      '/trip/:id': 'trip'
+      '/trips/:id': 'trip'
     },
     
     index: function() {
       
+      var self = this;
+      
+      this.account.validate(function() {
+        
+        var _id = self.account.trips.first().get('_id');
+        
+        self.navigate('/trips/' + _id);
+        
+      }, function() {
+        
+        new views.Prompt().render();
+      });
     },
     
     trip: function(id) {
       
+      var self = this;
+      
+      this.account.validate(function() {
+        
+      }, function() {
+        
+      });
     },
     
     initialize: function() {
-      this.map = new views.Map;
-      this.itinerary = new views.Itinerary;
+      this.account = new models.Account();
     }
   });
   
   /** Models **/
   models = {};
-  models.Trip = Backbone.Model.extend({});
-  models.Location = Backbone.Model.extend({});
-  models.Transit = Backbone.Model.extend({});
+  
+  models.Trip = Backbone.Model.extend({
+    
+    initialize: function() {
+      this.locations = new collections.Locations;
+      this.transits = new collections.Transits;
+    }
+  });
+  
+  models.Location = Backbone.Model.extend({
+    
+    initialize: function() {
+      this.needs = new collections.Needs;
+      this.suggestions = new collections.Suggestions;
+    }
+  });
+  
+  models.Transit = Backbone.Model.extend({
+    
+    initialize: function() {
+      this.needs = new collections.Needs;
+      this.suggestion = new collections.Suggestions;
+    }
+  });
+  
   models.Need = Backbone.Model.extend({});
   models.Suggestion = Backbone.Model.extend({});
   models.Associate = Backbone.Model.extend({});
+  
+  /** Collections **/
+  collections = {};
+  
+  collections.Trips = Backbone.Collection.extend({
+    model: models.Trip
+  });
+  
+  collections.Locations = Backbone.Collection.extend({
+    model: models.Location
+  });
+  
+  collections.Transits = Backbone.Collection.extend({
+    model: models.Transit
+  });
+  
+  collections.Needs = Backbone.Collection.extend({
+    model: models.Need
+  });
+  
+  collections.Suggestions = Backbone.Collection.extend({
+    model: models.Suggestion
+  });
   
   /** Views **/
   views = {};
@@ -51,8 +114,9 @@ var tba = (function() {
       disableDefaultUI: true
     },
     
-    render: function() {
-      this.map = new google.maps.Map(this.el, this.defaults);
+    initialize: function() {
+      this.gm = new google.maps.Map(this.el, this.defaults);
+      //this.model.bind('change', this.render, this);
     }
   });
   
@@ -61,6 +125,22 @@ var tba = (function() {
   views.Suggestions = Backbone.View.extend({});
   views.Suggestion = Backbone.View.extend({});
   views.Associate = Backbone.View.extend({});
+  
+  /** Templates **/
+  Marker.register('itinerary_form', function() {
+    this
+      .li()
+        .label('Add location to trip...').end()
+        .input({ type: 'text', placeholder: 'eg: Boston, MA' });
+  });
+
+  Marker.register('itinerary_item', function(content) {
+    this
+      .li()
+        .text(content)
+        .a({ href: '#', 'class': 'remove' })
+          .text('x')
+  });
   
   /** Utilities **/
   util = {};

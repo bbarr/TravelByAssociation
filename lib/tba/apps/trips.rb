@@ -20,9 +20,9 @@ class TBA::Trips < TBA::Base
   end
 
   get '/:trip_id' do
-    must_be_someone
-    @trip = Trip.find_by_id params[:trip_id]
-    haml :"trips/show"
+    #must_be_someone
+    content_type :json
+    { :title => 'first trip' }.to_json
   end
   
   delete '/:trip_id' do
