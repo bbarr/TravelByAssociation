@@ -1,49 +1,21 @@
 var tba = (function() {
   
-  var App, collections, models, views, templates, util;
-  
-  /** Application **/
-  App = Backbone.Router.extend({
-    
-    routes: {
-      '': 'index',
-      '/trips/:id': 'trip'
-    },
-    
-    index: function() {
-      
-      var self = this;
-      
-      this.account.validate(function() {
-        
-        var _id = self.account.trips.first().get('_id');
-        
-        self.navigate('/trips/' + _id);
-        
-      }, function() {
-        
-        new views.Prompt().render();
-      });
-    },
-    
-    trip: function(id) {
-      
-      var self = this;
-      
-      this.account.validate(function() {
-        
-      }, function() {
-        
-      });
-    },
-    
-    initialize: function() {
-      this.account = new models.Account();
-    }
-  });
+  var collections, models, views, util;
   
   /** Models **/
   models = {};
+  
+  models.Account = Backbone.Model.extend({
+    
+    defaults: {
+      email: '',
+      trips: []
+    },
+    
+    detect: function(cb) {
+      cb(false);
+    }
+  });
   
   models.Trip = Backbone.Model.extend({
     
@@ -146,8 +118,8 @@ var tba = (function() {
   util = {};
   
   return {
-    App: App,
     models: models,
+    collections: collections,
     views: views,
     util: util
   }
