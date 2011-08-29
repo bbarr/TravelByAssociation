@@ -6272,7 +6272,7 @@ jQuery.fn.extend({
 		})
 		.map(function( i, elem ){
 			var val = jQuery( this ).val();
-
+			
 			return val == null ?
 				null :
 				jQuery.isArray( val ) ?

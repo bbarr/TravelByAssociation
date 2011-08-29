@@ -9,11 +9,11 @@ var Marker = (function() {
 	Template.prototype = {
 	
 		partial: function(name, data) {
-			var template = Marker.templates[name];
+			var template = typeof name === 'function' ? name : Marker.templates[name];
 			if (!template) throw new Error('Template: ' + name + ' not found');
 
 			// hijack the active_fn so the partial builds itself right into the current template 
-			this.active_fn = template.fn;
+			this.active_fn = template.fn || template;
 			this._construct(data);
 			this.active_fn = this.fn;
 
@@ -109,7 +109,7 @@ var Marker = (function() {
 
 		var tags = [
 			'p','h1','h2','h3','h4','h5','h6','strong','em','abbr','address','bdo','blockquote','cite','q','code','ins','del','dfn','kbd','pre','samp','var','br',
-			'div', 'span', 'section', 'header', 'footer', 'sidebar',
+			'div', 'span', 'section', 'header', 'footer', 'sidebar', 'nav',
 			'a', 'base',
 			'img','area','map','object','param',
 			'ul','ol','li','dl','dt','dd',
@@ -160,7 +160,8 @@ var Marker = (function() {
 		render: function(name, data) {
 			var template = this.templates[name];
 			if (!template) throw new Error('Template: ' + name + ' not found');
-			return template._to_html(data);
+			var html = template._to_html(data);
+			return html.childNodes[1] ? html : html.childNodes[0];
 		}
 	}
 })();

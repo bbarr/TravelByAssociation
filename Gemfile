@@ -7,5 +7,6 @@ gem "haml"
 gem "rack-contrib"
 gem "json"
 gem "oauth"
+gem "warden"
 gem "shotgun", :group => :development
 gem "rspec", :group => :development

@@ -67,7 +67,7 @@ sidebar {
   top: 50px;
   right: auto;
   bottom: 30px;
-  left: 0;
+  left: 15px;
   background: #fff;
   opacity: .9;
   width: 250px;
@@ -114,6 +114,13 @@ sidebar .ad {
   background: #fff;
   border: 1px solid #aaa;
   padding: 10px;
+  -moz-box-shadow: 5px 5px 5px #aaa;
+  -webkit-box-shadow: 5px 5px 5px #aaa;
+  box-shadow: 5px 5px 5px #aaa;
+  transition: top 0.8s;
+  -moz-transition: top 0.8s;
+  -webkit-transition: top 0.8s;
+  -o-transition: top 0.8s;
 }
 
 .overlay .close {
@@ -129,5 +136,68 @@ sidebar .ad {
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 999;
+}
+
+#challenge form {
+  border: none;
+  overflow: hidden;
+}
+
+#challenge input {
+  display: block;
+  padding: 5px 10px;
+  font-size: 18px;
+  border: 1px solid #aaa;
+  margin-bottom: 10px;
+  width: 400px;
+}
+
+#challenge h3 {
+  margin: 10px 0 15px;
+  padding: 5px 10px;
+  background: #fff;
+}
+
+#challenge form h3:hover {
+  cursor: pointer;
+  color: #CC3300;
+}
+
+#challenge form.active h3:hover {
+  cursor: default;
+  color: #222;
+}
+
+#challenge form.active h3 {
+  background: yellow;
+}
+
+#challenge form {
+  height: 38px;
+  transition: height 0.8s;
+  -moz-transition: height 0.8s;
+  -webkit-transition: height 0.8s;
+  -o-transition: height 0.8s;
+}
+
+#challenge form#login.active {
+  height: 160px;
+}
+
+#challenge form#signup.active {
+  height: 250px;
+}
+
+#itinerary {
+  padding: 10px;
+}
+
+#itinerary li {
+  list-style: none;
+  border-bottom: 1px solid #eee;
+}
+
+#itinerary li:last-child {
+  border: none;
 }
