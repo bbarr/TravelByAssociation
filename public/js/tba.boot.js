@@ -3,49 +3,47 @@
   var $body = $('body'),
       app = new Backbone.Router, 
       user = new tba.models.User,
-      trip = user.get('trip'),
-      challenge = new tba.views.Challenge({ model: user }),
-      loading = new tba.views.Loading;
+      trip = user.get('trip');
 
   // render global views
   new tba.views.Header({ model: user }).render();
   new tba.views.Map({ model: trip });
   new tba.views.Itinerary({ model: trip }).render();
-  
+  new tba.views.Challenge({ model: user });
+  new tba.views.Loading({ model: app });
+
   /**
    *  ROUTES
    */
   app.route('', 'index', function() {
-    this.challenge = true;
-    if (user.get('detected')) {
-      app.navigate('/trips/new', true);
-    }
+    if ( !user.get('detected') ) user.trigger('prompt')
   });
 
   app.route('/trips/:id', 'trip', function(id) {
-    this.challenge = false;
+    
   });
 
-  app.route('/trips/new', 'new_trip', function() {
-    this.challenge = false;    
-    if (!user.get('detected')) {
-      app.navigate('', true);
-    }
-    else {
-      challenge.close();
-    }
-  });
+  user.bind('processing', function() {
+    app.trigger('loading');
+  }, app);
   
-  // start router/history
-  Backbone.history.start();
-
+  user.bind('processed', function() {
+    app.trigger('loaded');
+  }, app);
+  
   // app level login/logout updates
   user.bind('change:detected', function(user, detected) {
     $body.find('.admin')[ (detected ? 'remove' : 'add') + 'Class' ]('hide');
-    app.navigate( (detected ? '/trips/new' : ''), true);
-    if (app.challenge && detected === false) challenge.open();
+    user.trigger('processed');
+    if (detected) {
+      
+    }
   });
   
   // init by checking for user and starting router
-  user.detect();
+  user.detect(function() {
+    // start router/history
+    Backbone.history.start();
+  });
+
 })();

@@ -9,11 +9,11 @@ tba.models.User = Backbone.Model.extend({
     
   logout: function(data) {
     var self = this;
-    
+    this.trigger('processing');
     $.ajax({
       url: '/logout',
       type: 'POST',
-      success: function(response) {
+      success: function(response) {       
         self.set({ detected: false });
       },
       error: function(response) {}
@@ -22,12 +22,12 @@ tba.models.User = Backbone.Model.extend({
   
   login: function(data) {
     var self = this;
-      
+    this.trigger('processing');      
     $.ajax({
       type: 'POST',
       url: '/login',
       data: data,
-      success: function(response) {
+      success: function(response) {        
         response.detected = true;
         self.set(response);   
       },
@@ -39,6 +39,8 @@ tba.models.User = Backbone.Model.extend({
   },
 
   signup: function(data) {
+    var self = this;
+    this.trigger('processing');    
     $.ajax({
       type: 'POST',
       url: '/signup',
@@ -56,14 +58,15 @@ tba.models.User = Backbone.Model.extend({
     this.set({ trip: new tba.models.Trip });
   },
 
-  detect: function() {
+  detect: function(cb) {
     var self = this;
-    this.set({ detected: 0 })
+    this.trigger('processing');
     $.ajax({
       type: 'GET',
       url: '/confirm_user',
       success: function(result) {
         self.set({ detected: result.detected });
+        cb();        
       }
     });
   }
@@ -397,6 +400,7 @@ tba.views.Challenge = Backbone.View.extend({
     var self = this;    
     this.mixin(new tba.views.ObtrusiveOverlay('challenge'));
     this.delegateEvents(this.events);
+    this.model.bind('prompt', this.open, this);
   }
 });
 
@@ -405,8 +409,8 @@ tba.views.Loading = Backbone.View.extend({
   initialize: function() {
     var self = this;    
     this.mixin(new tba.views.ObtrusiveOverlay('loading'));
-    this.$el.ajaxStart(function() { self.open(); });
-    this.$el.ajaxStop(function() { self.close(); });
+    this.model.bind('loading', this.open, this);
+    this.model.bind('loaded', this.close, this);
   }
 });
 
