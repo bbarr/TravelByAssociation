@@ -56,6 +56,12 @@ tba.models.User = Backbone.Model.extend({
   
   initialize: function() {
     this.set({ trip: new tba.models.Trip });
+    this.bind('processing', function() { 
+      this.get('app').trigger('loading');
+    }, this);
+    this.bind('processed', function() { 
+      this.get('app').trigger('loaded');
+    }, this);
   },
 
   detect: function(cb) {
@@ -118,13 +124,18 @@ tba.models.Location = Backbone.Model.extend({
 
   initialize: function() {
     this.set({ needs: new tba.collections.Needs });
-    this.set({ suggestions: new tba.collections.Suggestions });
     this.geocode();
   }
 });
 
 tba.models.Transit = Backbone.Model.extend({
   
+});
+
+tba.models.Need = Backbone.Model.extend({
+  initialize: function() {
+    this.set({ suggestions: new tba.collections.Suggestions });
+  }
 });
 
 tba.collections.Locations = Backbone.Collection.extend({
@@ -166,9 +177,11 @@ tba.views.Itinerary = Backbone.View.extend({
   el: '#itinerary',
   events: {},
   render: function() {
+    console.log('rendering itin')
     this.render_list();
   },
   initialize: function(config) {
+    console.log('initing itin')
     this.mixin(new tba.views.AbstractList('itinerary', 'address', this.model.get('locations')));
     this.$el.parents('sidebar:first').removeClass('hide');
   }
@@ -201,9 +214,11 @@ tba.views.AbstractList.prototype = {
     e.preventDefault();
     var cid = $(e.target).parent('li').attr('id');
     this.collection.remove(cid);
+    return false;
   },
 
   added: function(item) {
+    console.log('calling added');
     var item = Marker.render(this.item_template, item);
     this.$form.before(item);
     this.$form.find('input').val('');
@@ -225,6 +240,7 @@ tba.views.AbstractList.prototype = {
   },
 
   initialize: function() {
+    console.log('calling list init')
     this.collection.bind('add', this.added, this);
     this.collection.bind('error', this.errored, this);
     this.collection.bind('remove', this.removed, this);
@@ -292,19 +308,8 @@ tba.views.Map = Backbone.View.extend({
   initialize: function() {
     var locations = this.model.get('locations');
     this.gm = new google.maps.Map(this.el, this.defaults);
-    locations.bind('add', this.add, this);
-    locations.bind('remove', this.remove, this);
-  }
-});
-
-tba.views.Needs = Backbone.View.extend({
-
-  initialize: function() {
-    this.mixin(new tba.views.AbstractList('needs', 'text', this.collection));
-  },
-
-  render: function() {
-    this.render_list();
+    //locations.bind('add', this.add, this);
+    //locations.bind('remove', this.remove, this);
   }
 });
 
@@ -423,23 +428,95 @@ tba.views.LocationOverlay = Backbone.View.extend({
   render: function() {
   
     var overlay = Marker.render('location_overlay', this.model),
-        $overlay = $(overlay);
+        $overlay = $(overlay),
+        needs = this.model.get('needs');
 
-    this.needs = new tba.views.Needs({ collection: this.model.get('needs'), el: $overlay.find('.needs')[0] });
-    this.suggestions = new tba.views.Suggestions({ collection: this.model.get('suggestions'), el: $overlay.find('.suggestions')[0] });
-
-    this.needs.render();
-    this.suggestions.render();
-
+    this.needs = new tba.views.Needs({ 
+      collection: needs, 
+      el: $overlay.find('.needs')[0] 
+    });
+    
+    this.suggestions = new tba.views.Suggestions({ 
+      el: $overlay.find('.suggestions')[0],
+      needs: needs
+    });
+    
+    this.needs.select(needs.first());
+    
     return overlay;
+  }
+});
+
+tba.views.Needs = Backbone.View.extend({
+
+  events: {
+    'click span': 'clicked_need'
+  },
+
+  initialize: function(data) {
+    var list = new tba.views.AbstractList('needs', 'text', this.collection);
+    _(this.events).extend(list.events);
+    this.mixin(list);
+    this.delegateEvents(this.events);
+    this.render();
+    this.collection.bind('add', this.select, this);    
+    this.collection.add({ text: 'General Tips and Advice' });
+  },
+  
+  clicked_need: function(e) {
+    var id = $(e.target)
+      .parent()
+      .attr('id');
+    this.select(this.collection.getByCid(id));
+  },
+  
+  select: function(need) {
+    this.collection.trigger('selected', need);
+  },
+
+  render: function() {
+    this.render_list();
   }
 });
 
 tba.views.Suggestions = Backbone.View.extend({
 
+  initialize: function(data) {
+    this.needs = data.needs;
+    var collection = data.needs.first();
+    this.previous_collections = [];
+    this.mixin(new tba.views.AbstractList('suggestions', 'text', collection));
+    this.change(collection);
+    this.needs.bind('selected', this.change, this); 
+  },
+  
+  change: function(need) {
+    this.collection = need.get('suggestions');
+    if (_(this.previous_collections).detect(this.collection)) {
+     this.previous_collections.push(this.collection); 
+    }
+    this.bind();
+    this.render();
+  },
+  
+  bind: function() {
+    if (_(this.previous_collections).detect(this.collection)) return;
+    this.collection.bind('add', this.render, this);
+    this.collection.bind('remove', this.render, this);
+  },
+
   render: function() {
-    var html = Marker.render('suggestions');
-    this.el.appendChild(html);
+    
+    var suggestions = this.collection,
+        self = this;
+
+    this.el.innerHTML = '';
+    
+    this.render_list();
+    
+    suggestions.each(function(s) {
+      self.added(s)
+    }); 
   }
 });
 
@@ -512,7 +589,7 @@ Marker.register('location_overlay', function(loc) {
   this
     .div({ className: 'location_overlay' })
       .ul({ className: 'needs' }).end()
-      .div({ className: 'suggestions' })
+      .ul({ className: 'suggestions' })
 
 });
 
@@ -526,14 +603,29 @@ Marker.register('needs_form', function() {
 Marker.register('needs_item', function(item) {
   this
     .li({ id: item.cid })
-      .text(item.get('text'))
-      .a({ href: '#', 'class': 'remove' })
+      .span(item.get('text')).end()
+      .a({ href: '#', className: 'remove' })
         .text('x')
 });
 
 Marker.register('suggestions', function() {
 
   this.div('suggestions');
+});
+
+Marker.register('suggestions_form', function() {
+  this
+    .li()
+      .label('Add suggestion').end()
+      .input({ type: 'text', placeholder: 'eg: Get in touch with my buddy Kevin.' });
+});
+
+Marker.register('suggestions_item', function(item) {
+  this
+    .li({ id: item.cid })
+      .text(item.get('text'))
+      .a({ href: '#', className: 'remove' })
+        .text('x')
 });
 
 Marker.register('loading', function() {

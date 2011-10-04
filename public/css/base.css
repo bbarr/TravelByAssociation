@@ -201,3 +201,19 @@ sidebar .ad {
 #itinerary li:last-child {
   border: none;
 }
+
+.location_overlay {
+  width: 600px;
+  height: 300px;
+}
+
+.needs {
+  float: left;
+  border-right: 1px solid #bbb;
+  padding: 10px 20px;
+  margin: 0 20px 0 0;
+}
+
+.suggestions {
+  
+}

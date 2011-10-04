@@ -2,7 +2,7 @@
 
   var $body = $('body'),
       app = new Backbone.Router, 
-      user = new tba.models.User,
+      user = new tba.models.User({ app: app }),
       trip = user.get('trip');
 
   // render global views
@@ -22,21 +22,13 @@
   app.route('/trips/:id', 'trip', function(id) {
     
   });
-
-  user.bind('processing', function() {
-    app.trigger('loading');
-  }, app);
-  
-  user.bind('processed', function() {
-    app.trigger('loaded');
-  }, app);
   
   // app level login/logout updates
   user.bind('change:detected', function(user, detected) {
     $body.find('.admin')[ (detected ? 'remove' : 'add') + 'Class' ]('hide');
-    user.trigger('processed');
-    if (detected) {
-      
+    this.trigger('processed');
+    if (!detected) {
+      this.trigger('prompt');
     }
   });
   
